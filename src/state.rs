@@ -1,24 +1,18 @@
-use crate::models::Item;
-use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
-};
+use crate::database::Database;
+use std::sync::Arc;
 
 pub type SharedState = Arc<AppState>;
 
-#[derive(Default)]
 pub struct AppState {
-    pub items: RwLock<HashMap<String, Item>>,
+    pub db: Arc<dyn Database>,
 }
 
 impl AppState {
-    pub fn new() -> Self {
-        Self {
-            items: RwLock::new(HashMap::new()),
-        }
+    pub fn new(db: Arc<dyn Database>) -> Self {
+        Self { db }
     }
 
-    pub fn shared() -> SharedState {
-        Arc::new(Self::new())
+    pub fn shared(db: Arc<dyn Database>) -> SharedState {
+        Arc::new(Self::new(db))
     }
 }

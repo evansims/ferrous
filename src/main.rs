@@ -1,4 +1,4 @@
-use estuary::{middleware, routes, state::AppState};
+use estuary::{database::DatabaseFactory, middleware, routes, state::AppState};
 use std::net::SocketAddr;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -17,8 +17,13 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    // Initialize database
+    let db = DatabaseFactory::create()
+        .await
+        .expect("Failed to initialize database");
+
     // Create shared application state
-    let state = AppState::shared();
+    let state = AppState::shared(db);
 
     // Build application with routes and middleware
     let app = middleware::add_middleware(routes::create_routes(state));

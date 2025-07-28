@@ -98,13 +98,15 @@ The application supports loading environment variables from a `.env` file. Copy 
 
 - `PORT` - Server port (default: `3000`)
 - `RUST_LOG` - Control logging levels (default: `estuary=debug,tower_http=debug`)
+- `DATABASE_TYPE` - Database implementation: `memory` (default), `postgres` (future), `sqlite` (future)
 
 ## Architecture Notes
 
-- Uses `RwLock` for thread-safe in-memory storage (replace with a real database for production)
-- Implements proper error handling with typed responses
-- Follows RESTful conventions with appropriate HTTP status codes
-- Minimal dependencies for reliability and security
+- **Database Abstraction**: Repository pattern with swappable database implementations
+- **Current Implementation**: Thread-safe in-memory storage
+- **Future Support**: PostgreSQL, SQLite, and other databases via environment configuration
+- **Error Handling**: Typed responses with proper HTTP status codes
+- **Design Philosophy**: Clean architecture with minimal dependencies
 
 ## Maintenance
 

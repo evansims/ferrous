@@ -75,18 +75,27 @@ The service follows a modular architecture with clear separation of concerns:
 
 ### Key Design Patterns
 
-1. **State Management**: `SharedState` type alias for `Arc<AppState>`. The `AppState` struct contains `RwLock<HashMap<String, Item>>` for thread-safe storage.
+1. **Database Abstraction**: 
+   - Repository pattern with `Database` trait and `ItemRepository`
+   - Swappable implementations via `DatabaseFactory`
+   - Currently supports in-memory storage, easily extensible
 
-2. **Error Handling**: Centralized through `AppError` enum that implements `IntoResponse`. All handlers return `AppResult<T>` (alias for `Result<T, AppError>`).
+2. **State Management**: `SharedState` holds `Arc<dyn Database>` for database access
 
-3. **Middleware Stack**: Applied in `middleware::add_middleware()`:
+3. **Error Handling**: 
+   - Centralized through `AppError` enum that implements `IntoResponse`
+   - Database errors automatically map to appropriate HTTP status codes
+   - All handlers return `AppResult<T>`
+
+4. **Middleware Stack**: Applied in `middleware::add_middleware()`:
    - TraceLayer (outermost) - HTTP request/response logging
    - CorsLayer - Enables cross-origin requests
    
-4. **Type Organization**: 
+5. **Type Organization**: 
    - Models: `Item`, `CreateItemRequest`, `UpdateItemRequest` in `models/`
-   - Handler-specific types: `ListQuery`, `ListResponse` in `handlers/items.rs`
-   - Error types: `ErrorResponse`, `AppError` in `error.rs`
+   - Repositories: `ItemRepository` trait in `database/repositories/`
+   - Database implementations: `InMemoryDatabase` in `database/implementations/`
+   - Handler types: `ListQuery`, `ListResponse` in `handlers/items.rs`
 
 ## Important Implementation Details
 

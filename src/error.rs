@@ -1,3 +1,4 @@
+use crate::database::DatabaseError;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -18,6 +19,7 @@ pub enum AppError {
     InternalServerError(String),
     BadRequest(String),
     LockError,
+    DatabaseError(DatabaseError),
 }
 
 impl fmt::Display for AppError {
@@ -27,6 +29,7 @@ impl fmt::Display for AppError {
             AppError::InternalServerError(msg) => write!(f, "Internal server error: {}", msg),
             AppError::BadRequest(msg) => write!(f, "Bad request: {}", msg),
             AppError::LockError => write!(f, "Failed to acquire lock"),
+            AppError::DatabaseError(e) => write!(f, "Database error: {}", e),
         }
     }
 }
@@ -44,6 +47,33 @@ impl IntoResponse for AppError {
                 "lock_error",
                 "Failed to acquire lock".to_string(),
             ),
+            AppError::DatabaseError(e) => match e {
+                DatabaseError::NotFound => (
+                    StatusCode::NOT_FOUND,
+                    "not_found",
+                    "Resource not found".to_string(),
+                ),
+                DatabaseError::ConnectionError(msg) => (
+                    StatusCode::SERVICE_UNAVAILABLE,
+                    "database_connection_error",
+                    msg,
+                ),
+                DatabaseError::QueryError(msg) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "database_query_error",
+                    msg,
+                ),
+                DatabaseError::SerializationError(msg) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "serialization_error",
+                    msg,
+                ),
+                DatabaseError::LockError => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "lock_error",
+                    "Failed to acquire database lock".to_string(),
+                ),
+            },
         };
 
         let error_response = ErrorResponse {
@@ -56,3 +86,9 @@ impl IntoResponse for AppError {
 }
 
 pub type AppResult<T> = Result<T, AppError>;
+
+impl From<DatabaseError> for AppError {
+    fn from(error: DatabaseError) -> Self {
+        AppError::DatabaseError(error)
+    }
+}

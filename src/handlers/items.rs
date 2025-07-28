@@ -1,6 +1,6 @@
 use crate::{
-    error::{AppError, AppResult},
-    models::{CreateItemRequest, Item, UpdateItemRequest},
+    error::AppResult,
+    models::{CreateItemRequest, UpdateItemRequest},
     state::SharedState,
 };
 use axum::{
@@ -29,17 +29,14 @@ pub async fn list_items(
     Query(params): Query<ListQuery>,
     State(state): State<SharedState>,
 ) -> AppResult<impl IntoResponse> {
-    let items = state.items.read().map_err(|_| AppError::LockError)?;
-
     let limit = params.limit.unwrap_or(20).min(100);
     let offset = params.offset.unwrap_or(0);
 
-    let all_items: Vec<Item> = items.values().cloned().collect();
-    let total = all_items.len();
-    let paginated_items = all_items.into_iter().skip(offset).take(limit).collect();
+    let items = state.db.items().list(limit, offset).await?;
+    let total = state.db.items().count().await?;
 
     Ok(Json(ListResponse {
-        items: paginated_items,
+        items,
         total,
         limit,
         offset,
@@ -50,21 +47,7 @@ pub async fn create_item(
     State(state): State<SharedState>,
     Json(payload): Json<CreateItemRequest>,
 ) -> AppResult<impl IntoResponse> {
-    let id = uuid::Uuid::new_v4().to_string();
-    let now = chrono::Utc::now();
-
-    let item = Item {
-        id: id.clone(),
-        name: payload.name,
-        description: payload.description,
-        created_at: now,
-        updated_at: now,
-    };
-
-    let mut items = state.items.write().map_err(|_| AppError::LockError)?;
-
-    items.insert(id, item.clone());
-
+    let item = state.db.items().create(payload).await?;
     Ok((StatusCode::CREATED, Json(item)))
 }
 
@@ -72,13 +55,8 @@ pub async fn get_item(
     Path(id): Path<String>,
     State(state): State<SharedState>,
 ) -> AppResult<impl IntoResponse> {
-    let items = state.items.read().map_err(|_| AppError::LockError)?;
-
-    items
-        .get(&id)
-        .cloned()
-        .map(Json)
-        .ok_or_else(|| AppError::NotFound(format!("Item with id '{}' not found", id)))
+    let item = state.db.items().get(&id).await?;
+    Ok(Json(item))
 }
 
 pub async fn update_item(
@@ -86,32 +64,14 @@ pub async fn update_item(
     State(state): State<SharedState>,
     Json(payload): Json<UpdateItemRequest>,
 ) -> AppResult<impl IntoResponse> {
-    let mut items = state.items.write().map_err(|_| AppError::LockError)?;
-
-    let item = items
-        .get_mut(&id)
-        .ok_or_else(|| AppError::NotFound(format!("Item with id '{}' not found", id)))?;
-
-    if let Some(name) = payload.name {
-        item.name = name;
-    }
-    if payload.description.is_some() {
-        item.description = payload.description;
-    }
-    item.updated_at = chrono::Utc::now();
-
-    Ok(Json(item.clone()))
+    let item = state.db.items().update(&id, payload).await?;
+    Ok(Json(item))
 }
 
 pub async fn delete_item(
     Path(id): Path<String>,
     State(state): State<SharedState>,
 ) -> AppResult<impl IntoResponse> {
-    let mut items = state.items.write().map_err(|_| AppError::LockError)?;
-
-    items
-        .remove(&id)
-        .ok_or_else(|| AppError::NotFound(format!("Item with id '{}' not found", id)))?;
-
+    state.db.items().delete(&id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
