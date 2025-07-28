@@ -1,0 +1,56 @@
+version: 2
+updates:
+  # Enable version updates for Rust dependencies
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      # Check for updates weekly on Monday
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    # Open pull requests for version updates
+    open-pull-requests-limit: 10
+    # Assign reviewers and labels
+    reviewers:
+      - "evansims"
+    labels:
+      - "dependencies"
+      - "rust"
+    # Group dependency updates to reduce PR noise
+    groups:
+      # Group all minor and patch updates together
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Allow dependency updates for security vulnerabilities
+    allow:
+      - dependency-type: "all"
+    # Commit message customization
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Ignore specific dependencies if needed (currently none)
+    # ignore:
+    #   - dependency-name: "example-crate"
+    #     versions: ["1.x", "2.x"]
+
+  # Enable security updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
