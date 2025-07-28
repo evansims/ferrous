@@ -1,3 +1,4 @@
+pub mod convex;
 pub mod in_memory;
 
 use crate::database::{Database, DatabaseError};
@@ -13,9 +14,14 @@ impl DatabaseFactory {
         
         match db_type.as_str() {
             "memory" | "in-memory" => Ok(Arc::new(in_memory::InMemoryDatabase::new())),
-            // Future implementations can be added here:
-            // "postgres" => Ok(Arc::new(postgres::PostgresDatabase::new().await?)),
-            // "sqlite" => Ok(Arc::new(sqlite::SqliteDatabase::new().await?)),
+            "convex" => {
+                let deployment_url = std::env::var("CONVEX_DEPLOYMENT_URL")
+                    .map_err(|_| DatabaseError::ConnectionError(
+                        "CONVEX_DEPLOYMENT_URL environment variable not set".to_string()
+                    ))?;
+                Ok(Arc::new(convex::ConvexDatabase::new(&deployment_url).await?))
+            }
+            // Future implementations can be added here
             _ => Err(DatabaseError::ConnectionError(format!(
                 "Unknown database type: {}",
                 db_type
