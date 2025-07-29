@@ -111,11 +111,11 @@ pub fn validate_length_range(
         if len < min || len > max {
             let mut error = ValidationError::new("length");
             error.message = Some(std::borrow::Cow::Owned(if min == 0 {
-                format!("Must be at most {} characters", max)
+                format!("Must be at most {max} characters")
             } else if len < min {
-                format!("Must be at least {} characters", min)
+                format!("Must be at least {min} characters")
             } else {
-                format!("Must be between {} and {} characters", min, max)
+                format!("Must be between {min} and {max} characters")
             }));
             return Err(error);
         }

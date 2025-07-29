@@ -98,12 +98,12 @@ pub enum AppError {
 impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AppError::NotFound(msg) => write!(f, "Not found: {}", msg),
-            AppError::InternalServerError(msg) => write!(f, "Internal server error: {}", msg),
-            AppError::BadRequest(msg) => write!(f, "Bad request: {}", msg),
-            AppError::ValidationError(msg) => write!(f, "Validation error: {}", msg),
+            AppError::NotFound(msg) => write!(f, "Not found: {msg}"),
+            AppError::InternalServerError(msg) => write!(f, "Internal server error: {msg}"),
+            AppError::BadRequest(msg) => write!(f, "Bad request: {msg}"),
+            AppError::ValidationError(msg) => write!(f, "Validation error: {msg}"),
             AppError::LockError => write!(f, "Failed to acquire lock"),
-            AppError::DatabaseError(e) => write!(f, "Database error: {}", e),
+            AppError::DatabaseError(e) => write!(f, "Database error: {e}"),
         }
     }
 }
