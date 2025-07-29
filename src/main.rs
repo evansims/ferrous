@@ -1,5 +1,5 @@
 use estuary::{
-    database::DatabaseFactory, handlers::health::APP_START_TIME, middleware, routes,
+    database::DatabaseFactory, handlers::health::APP_START_TIME, metrics, middleware, routes,
     state::AppState,
 };
 use std::{net::SocketAddr, time::Instant};
@@ -11,6 +11,9 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize application start time for uptime tracking
     APP_START_TIME.set(Instant::now()).ok();
+
+    // Initialize metrics
+    metrics::init_metrics();
 
     // Load .env file if it exists
     dotenvy::dotenv().ok();

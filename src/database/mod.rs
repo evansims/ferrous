@@ -1,10 +1,12 @@
 pub mod implementations;
+pub mod metrics_wrapper;
 pub mod repositories;
 
 use async_trait::async_trait;
 use std::sync::Arc;
 
 pub use implementations::DatabaseFactory;
+pub use metrics_wrapper::MetricsDatabase;
 pub use repositories::*;
 
 /// Main database trait that all database implementations must implement

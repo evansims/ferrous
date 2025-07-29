@@ -4,7 +4,8 @@ use crate::{
 };
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
-use serde_json::json; // Used in #[schema(example = json!({...}))] attributes
+#[allow(unused_imports)] // Used in #[schema(example = json!({...}))] attributes
+use serde_json::json;
 use std::time::Instant;
 use sysinfo::System;
 use utoipa::ToSchema;

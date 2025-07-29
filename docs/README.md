@@ -68,7 +68,7 @@ estuary/
 - **Hot Reload**: Development server with automatic recompilation on changes
 
 ### API Features
-- **OpenAPI/Swagger Documentation**: Interactive API documentation at `/docs`
+- **OpenAPI Documentation**: Machine-readable API specification at `/openapi.json`
 - **Structured Error Responses**: Consistent error format with request correlation
 - **Input Validation**: Comprehensive validation with field length limits and sanitization
 - **Request ID Tracking**: Unique request IDs for debugging and log correlation

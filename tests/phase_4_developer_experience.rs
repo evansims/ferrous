@@ -9,7 +9,7 @@ async fn test_openapi_json_endpoint() {
     let app = common::create_test_app().await;
 
     let response = app
-        .oneshot(common::get_request("/api-docs/openapi.json"))
+        .oneshot(common::get_request("/openapi.json"))
         .await
         .unwrap();
 
@@ -34,23 +34,6 @@ async fn test_openapi_json_endpoint() {
     assert!(body["components"]["schemas"]["ErrorResponse"].is_object());
 }
 
-#[tokio::test]
-async fn test_swagger_ui_endpoint() {
-    let app = common::create_test_app().await;
-
-    let response = app.oneshot(common::get_request("/docs")).await.unwrap();
-
-    assert_eq!(response.status(), StatusCode::OK);
-
-    // Check that it returns HTML
-    let content_type = response
-        .headers()
-        .get("content-type")
-        .unwrap()
-        .to_str()
-        .unwrap();
-    assert!(content_type.contains("text/html"));
-}
 
 #[tokio::test]
 async fn test_structured_error_response_format() {

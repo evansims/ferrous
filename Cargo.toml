@@ -25,3 +25,5 @@ base64 = "0.22"
 sysinfo = "0.31"
 num_cpus = "1.16"
 utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
+prometheus = "0.13"
+once_cell = "1.20"

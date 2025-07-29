@@ -9,6 +9,8 @@ pub fn create_routes(state: SharedState) -> Router {
         .route("/health", get(health_check))
         .route("/health/live", get(liveness))
         .route("/health/ready", get(readiness))
+        // Metrics endpoint
+        .route("/metrics", get(metrics_handler))
         // API endpoints
         .route("/api/v1/items", get(list_items).post(create_item))
         .route(

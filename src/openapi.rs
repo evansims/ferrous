@@ -6,11 +6,7 @@ use crate::{
     },
     models::{CreateItemRequest, Item, UpdateItemRequest},
 };
-use axum::{
-    response::{Html, IntoResponse},
-    routing::get,
-    Json, Router,
-};
+use axum::{response::IntoResponse, routing::get, Json, Router};
 use utoipa::{
     openapi::security::{Http, HttpAuthScheme, SecurityScheme},
     Modify, OpenApi,
@@ -90,41 +86,7 @@ impl Modify for SecurityAddon {
 
 /// Create documentation routes
 pub fn create_docs_routes() -> Router {
-    Router::new()
-        .route("/docs", get(swagger_ui_html))
-        .route("/api-docs/openapi.json", get(openapi_json_handler))
-}
-
-/// Serve a simple Swagger UI HTML page
-async fn swagger_ui_html() -> Html<String> {
-    Html(
-        r#"<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Estuary API Documentation</title>
-    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css">
-</head>
-<body>
-    <div id="swagger-ui"></div>
-    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
-    <script>
-    window.onload = function() {
-        window.ui = SwaggerUIBundle({
-            url: '/api-docs/openapi.json',
-            dom_id: '#swagger-ui',
-            deepLinking: true,
-            presets: [
-                SwaggerUIBundle.presets.apis,
-            ],
-            layout: "BaseLayout"
-        });
-    };
-    </script>
-</body>
-</html>"#
-            .to_string(),
-    )
+    Router::new().route("/openapi.json", get(openapi_json_handler))
 }
 
 /// Serve the OpenAPI JSON spec

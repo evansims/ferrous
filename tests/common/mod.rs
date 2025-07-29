@@ -1,6 +1,6 @@
 use axum::{body::Body, http::Request};
 use estuary::{
-    database::{implementations::in_memory::InMemoryDatabase, Database},
+    database::{Database, MetricsDatabase, implementations::in_memory::InMemoryDatabase},
     models::{CreateItemRequest, Item},
     state::SharedState,
 };
@@ -8,7 +8,9 @@ use std::sync::Arc;
 
 /// Create a test database instance
 pub fn create_test_db() -> Arc<dyn Database> {
-    Arc::new(InMemoryDatabase::new())
+    // Wrap with metrics tracking like in production
+    let base_db = Arc::new(InMemoryDatabase::new());
+    Arc::new(MetricsDatabase::new(base_db))
 }
 
 /// Create a test app state
@@ -52,6 +54,9 @@ pub async fn create_test_items(db: &Arc<dyn Database>, count: usize) -> Vec<Item
 
 /// Create a test app for integration testing
 pub async fn create_test_app() -> axum::Router {
+    // Initialize metrics for tests
+    estuary::metrics::init_metrics();
+    
     let state = create_test_state();
     let app = estuary::routes::create_routes(state);
     estuary::middleware::add_middleware(app)
@@ -85,4 +90,31 @@ where
         .await
         .unwrap();
     serde_json::from_slice(&body).unwrap()
+}
+
+/// Create a PUT request with JSON body
+pub fn put_request(uri: &str, json: serde_json::Value) -> Request<Body> {
+    Request::builder()
+        .method("PUT")
+        .uri(uri)
+        .header("content-type", "application/json")
+        .body(Body::from(json.to_string()))
+        .unwrap()
+}
+
+/// Create a DELETE request
+pub fn delete_request(uri: &str) -> Request<Body> {
+    Request::builder()
+        .method("DELETE")
+        .uri(uri)
+        .body(Body::empty())
+        .unwrap()
+}
+
+/// Get response body as string
+pub async fn response_body_string(response: axum::response::Response) -> String {
+    let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    String::from_utf8(body.to_vec()).unwrap()
 }

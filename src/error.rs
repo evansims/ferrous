@@ -6,7 +6,8 @@ use axum::{
 };
 use chrono::{DateTime, Utc};
 use serde::Serialize;
-use serde_json::json; // Used in #[schema(example = json!({...}))] attributes
+#[allow(unused_imports)] // Used in #[schema(example = json!({...}))] attributes
+use serde_json::json;
 use std::fmt;
 use utoipa::ToSchema;
 

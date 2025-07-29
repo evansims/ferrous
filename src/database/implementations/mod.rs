@@ -1,7 +1,7 @@
 pub mod convex;
 pub mod in_memory;
 
-use crate::database::{Database, DatabaseError};
+use crate::database::{Database, DatabaseError, MetricsDatabase};
 use std::sync::Arc;
 
 /// Factory for creating database instances based on configuration
@@ -12,23 +12,26 @@ impl DatabaseFactory {
     pub async fn create() -> Result<Arc<dyn Database>, DatabaseError> {
         let db_type = std::env::var("DATABASE_TYPE").unwrap_or_else(|_| "memory".to_string());
 
-        match db_type.as_str() {
-            "memory" | "in-memory" => Ok(Arc::new(in_memory::InMemoryDatabase::new())),
+        let base_db: Arc<dyn Database> = match db_type.as_str() {
+            "memory" | "in-memory" => Arc::new(in_memory::InMemoryDatabase::new()),
             "convex" => {
                 let deployment_url = std::env::var("CONVEX_DEPLOYMENT_URL").map_err(|_| {
                     DatabaseError::ConnectionError(
                         "CONVEX_DEPLOYMENT_URL environment variable not set".to_string(),
                     )
                 })?;
-                Ok(Arc::new(
-                    convex::ConvexDatabase::new(&deployment_url).await?,
-                ))
+                Arc::new(convex::ConvexDatabase::new(&deployment_url).await?)
             }
             // Future implementations can be added here
-            _ => Err(DatabaseError::ConnectionError(format!(
-                "Unknown database type: {}",
-                db_type
-            ))),
-        }
+            _ => {
+                return Err(DatabaseError::ConnectionError(format!(
+                    "Unknown database type: {}",
+                    db_type
+                )))
+            }
+        };
+
+        // Wrap with metrics tracking
+        Ok(Arc::new(MetricsDatabase::new(base_db)))
     }
 }

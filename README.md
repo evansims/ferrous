@@ -37,7 +37,7 @@ The service will start on `http://localhost:3000`
 - **Comprehensive Test Suite** - Unit tests, integration tests, and test utilities
 
 ### API Features
-- **OpenAPI/Swagger Documentation** - Interactive API docs at `/docs`
+- **OpenAPI Documentation** - Machine-readable API spec at `/openapi.json`
 - **Structured Error Responses** - Consistent error format with machine-readable codes
 - **Input Validation** - Field length limits (name: 1-255 chars, description: max 1000 chars) with sanitization
 - **Request ID Tracking** - Unique request IDs for debugging and log correlation
@@ -57,14 +57,16 @@ The service will start on `http://localhost:3000`
 ## API Endpoints
 
 ### Documentation
-- `GET /docs` - Swagger UI for interactive API exploration
-- `GET /api-docs/openapi.json` - OpenAPI specification
+- `GET /openapi.json` - OpenAPI 3.0 specification
 
 ### Health Checks
 - `GET /` - Basic health status
 - `GET /health` - Comprehensive health check with system metrics
 - `GET /health/live` - Liveness probe for container orchestration
 - `GET /health/ready` - Readiness probe with database connectivity check
+
+### Monitoring
+- `GET /metrics` - Prometheus metrics endpoint
 
 ### Items Resource
 - `GET /api/v1/items` - List all items (supports pagination)

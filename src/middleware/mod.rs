@@ -1,4 +1,5 @@
 pub mod error;
+pub mod metrics;
 
 use crate::{
     auth::{AuthConfig, JwtValidator},
@@ -21,6 +22,8 @@ pub fn add_middleware(app: Router) -> Router {
         ServiceBuilder::new()
             // Request ID tracking (outermost to generate ID first)
             .layer(middleware::from_fn(request_id_middleware))
+            // Metrics collection
+            .layer(middleware::from_fn(metrics::metrics_middleware))
             // Apply rate limiting
             .layer(middleware::from_fn(move |req, next| {
                 crate::rate_limit::rate_limit_middleware(req, next, rate_limiter.clone())

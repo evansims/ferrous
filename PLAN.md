@@ -82,12 +82,12 @@ This document tracks planned improvements and enhancements for the Estuary proje
 - [x] Create separate liveness and readiness endpoints
 
 ### 9. Metrics and Monitoring
-**Status**: Not Started
+**Status**: Completed ✅
 **Why**: No visibility into application performance
-- [ ] Add Prometheus metrics endpoint
-- [ ] Track request duration, status codes
-- [ ] Monitor database query performance
-- [ ] Add custom business metrics
+- [x] Add Prometheus metrics endpoint at /metrics
+- [x] Track request duration, status codes
+- [x] Monitor database query performance
+- [x] Add custom business metrics (items created/updated/deleted)
 
 ## 📝 Priority 4: Developer Experience
 
@@ -99,11 +99,11 @@ This document tracks planned improvements and enhancements for the Estuary proje
 - [ ] Plan deprecation strategy
 - [ ] Update API documentation
 
-### 11. OpenAPI/Swagger Documentation
+### 11. OpenAPI Documentation
 **Status**: Completed ✅
-**Why**: Interactive API documentation improves adoption
+**Why**: Machine-readable API documentation improves adoption
 - [x] Add OpenAPI spec generation
-- [x] Create Swagger UI endpoint
+- [x] Create OpenAPI JSON endpoint at /openapi.json
 - [x] Keep spec in sync with code
 - [x] Add request/response examples
 
@@ -166,9 +166,9 @@ This document tracks planned improvements and enhancements for the Estuary proje
 
 1. **Phase 1** (Foundation): Tests (#1), Error Handling (#2) ✅
 2. **Phase 2** (Security): Input Validation (#3), Rate Limiting (#4), Security Headers (#7), JWKS Auth (#15) ✅
-3. **Phase 3** (Operations): Graceful Shutdown (#6), Health Endpoints (#8), Request Tracking (#5) ✅
+3. **Phase 3** (Operations): Graceful Shutdown (#6), Health Endpoints (#8), Request Tracking (#5), Metrics (#9) ✅
 4. **Phase 4** (Developer Experience): OpenAPI (#11), Error Responses (#12) ✅
-5. **Phase 5** (Production Ready): Config Validation (#13), Metrics (#9), Deployment Docs (#16)
+5. **Phase 5** (Production Ready): Config Validation (#13), Deployment Docs (#16)
 
 ## Development Philosophy
 

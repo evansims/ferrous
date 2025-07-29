@@ -10,19 +10,18 @@ http://localhost:3000
 
 ## Documentation
 
-### GET /docs
+### GET /openapi.json
 
-Interactive Swagger UI for exploring and testing API endpoints.
-
-**Response**
-- HTML page with Swagger UI interface
-
-### GET /api-docs/openapi.json
-
-OpenAPI 3.0 specification for the API.
+OpenAPI 3.0 specification for the API in JSON format.
 
 **Response**
 - JSON document conforming to OpenAPI 3.0 specification
+- Content-Type: `application/json`
+
+**Example Usage**
+```bash
+curl http://localhost:3000/openapi.json
+```
 
 ## Health Checks
 
@@ -422,6 +421,55 @@ The API is versioned via the URL path. The current version is `v1`.
 Example: `/api/v1/items`
 
 Future versions will be available at `/api/v2/items`, etc.
+
+## Metrics
+
+### GET /metrics
+
+Prometheus-compatible metrics endpoint that exposes application performance and business metrics.
+
+**Response**
+- Content-Type: `text/plain; version=0.0.4`
+- Prometheus text format metrics
+
+**Available Metrics**
+
+#### HTTP Metrics
+- `http_request_duration_seconds` - HTTP request duration histogram by method, endpoint, and status
+- `http_requests_total` - Total number of HTTP requests by method, endpoint, and status
+
+#### Database Metrics
+- `database_query_duration_seconds` - Database query duration histogram by operation and repository
+- `database_queries_total` - Total number of database queries by operation, repository, and status
+- `database_connections_active` - Number of active database connections (gauge)
+
+#### Business Metrics
+- `items_created_total` - Total number of items created
+- `items_updated_total` - Total number of items updated
+- `items_deleted_total` - Total number of items deleted
+
+**Example Usage**
+```bash
+# Get current metrics
+curl http://localhost:3000/metrics
+
+# Example output
+# HELP http_requests_total Total number of HTTP requests
+# TYPE http_requests_total counter
+http_requests_total{endpoint="/api/v1/items",method="GET",status="200"} 42
+```
+
+**Integration with Prometheus**
+
+Add to your `prometheus.yml`:
+```yaml
+scrape_configs:
+  - job_name: 'estuary'
+    static_configs:
+      - targets: ['localhost:3000']
+```
+
+**Note**: The metrics endpoint bypasses authentication when enabled to allow monitoring systems to scrape metrics without credentials.
 
 ## Environment Configuration
 
