@@ -5,7 +5,7 @@ use axum::{
     Json,
 };
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 #[allow(unused_imports)] // Used in #[schema(example = json!({...}))] attributes
 use serde_json::json;
 use std::fmt;
@@ -67,7 +67,7 @@ pub struct ValidationError {
 }
 
 /// Machine-readable error codes
-#[derive(Debug, Serialize, Clone, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, Clone, ToSchema, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ErrorCode {
     // Client errors (4xx)
@@ -115,12 +115,9 @@ impl IntoResponse for AppError {
 
         let (status, error_code, message, details) = match self {
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, ErrorCode::NotFound, msg, None),
-            AppError::InternalServerError(msg) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                ErrorCode::InternalServerError,
-                msg,
-                None,
-            ),
+            AppError::InternalServerError(msg) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, ErrorCode::InternalServerError, msg, None)
+            }
             AppError::BadRequest(msg) => {
                 (StatusCode::BAD_REQUEST, ErrorCode::BadRequest, msg, None)
             }
@@ -250,5 +247,94 @@ impl From<validator::ValidationErrors> for AppError {
     fn from(errors: validator::ValidationErrors) -> Self {
         // For query parameter validation, we want to return BadRequest
         AppError::BadRequest(errors.to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_error_to_status_code_mapping() {
+        let test_cases = vec![
+            (AppError::NotFound("test".to_string()), StatusCode::NOT_FOUND),
+            (
+                AppError::ValidationError("test".to_string()),
+                StatusCode::UNPROCESSABLE_ENTITY,
+            ),
+            (
+                AppError::DatabaseError(DatabaseError::NotFound),
+                StatusCode::NOT_FOUND,
+            ),
+            (
+                AppError::DatabaseError(DatabaseError::QueryError("test".to_string())),
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ),
+            (
+                AppError::InternalServerError("test".to_string()),
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ),
+        ];
+
+        for (error, expected_status) in test_cases {
+            let response = error.into_response();
+            assert_eq!(response.status(), expected_status);
+        }
+    }
+
+    #[test]
+    fn test_validation_error_string() {
+        let error = AppError::ValidationError("Invalid input".to_string());
+        let response = error.into_response();
+        
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    }
+
+    #[test]
+    fn test_database_error_conversion() {
+        let db_errors = vec![
+            (DatabaseError::NotFound, StatusCode::NOT_FOUND),
+            (DatabaseError::QueryError("test".to_string()), StatusCode::INTERNAL_SERVER_ERROR),
+            (DatabaseError::ConnectionError("test".to_string()), StatusCode::SERVICE_UNAVAILABLE),
+        ];
+
+        for (db_error, expected_status) in db_errors {
+            let app_error: AppError = db_error.into();
+            let response = app_error.into_response();
+            assert_eq!(response.status(), expected_status);
+        }
+    }
+
+    #[test]
+    fn test_error_code_serialization() {
+        let codes = vec![
+            ErrorCode::ValidationError,
+            ErrorCode::NotFound,
+            ErrorCode::Unauthorized,
+            ErrorCode::Forbidden,
+            ErrorCode::RateLimitExceeded,
+            ErrorCode::InternalServerError,
+            ErrorCode::ServiceUnavailable,
+        ];
+
+        for code in codes {
+            let serialized = serde_json::to_string(&code).unwrap();
+            let deserialized: ErrorCode = serde_json::from_str(&serialized).unwrap();
+            assert_eq!(code, deserialized);
+        }
+    }
+
+    #[test]
+    fn test_parse_validation_errors() {
+        let error_str = "name: Name is required\nemail: Invalid email format";
+        let errors = parse_validation_errors(error_str);
+
+        assert!(errors.is_some());
+        let errors = errors.unwrap();
+        assert_eq!(errors.len(), 2);
+        assert_eq!(errors[0].field, "name");
+        assert_eq!(errors[0].message, "Name is required");
+        assert_eq!(errors[1].field, "email");
+        assert_eq!(errors[1].message, "Invalid email format");
     }
 }

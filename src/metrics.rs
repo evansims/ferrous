@@ -65,11 +65,8 @@ pub static ITEMS_DELETED_COUNTER: Lazy<CounterVec> = Lazy::new(|| {
 
 /// Active database connections
 pub static DATABASE_CONNECTIONS: Lazy<IntGauge> = Lazy::new(|| {
-    register_int_gauge!(
-        "database_connections_active",
-        "Number of active database connections"
-    )
-    .expect("Failed to register database connections gauge")
+    register_int_gauge!("database_connections_active", "Number of active database connections")
+        .expect("Failed to register database connections gauge")
 });
 
 /// Initialize all metrics (called at startup to ensure registration)

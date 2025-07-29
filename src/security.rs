@@ -45,6 +45,15 @@ impl SecurityConfig {
     }
 }
 
+impl From<&crate::config::SecurityConfig> for SecurityConfig {
+    fn from(config: &crate::config::SecurityConfig) -> Self {
+        Self {
+            strict_mode: config.strict_mode,
+            csp: config.csp.clone(),
+        }
+    }
+}
+
 /// Security headers middleware
 pub async fn security_headers_middleware(req: Request, next: Next) -> Response {
     let config = SecurityConfig::from_env();
@@ -52,15 +61,9 @@ pub async fn security_headers_middleware(req: Request, next: Next) -> Response {
     let headers = response.headers_mut();
 
     // Always set these security headers
-    headers.insert(
-        header::X_CONTENT_TYPE_OPTIONS,
-        HeaderValue::from_static("nosniff"),
-    );
+    headers.insert(header::X_CONTENT_TYPE_OPTIONS, HeaderValue::from_static("nosniff"));
     headers.insert(header::X_FRAME_OPTIONS, HeaderValue::from_static("DENY"));
-    headers.insert(
-        "X-XSS-Protection",
-        HeaderValue::from_static("1; mode=block"),
-    );
+    headers.insert("X-XSS-Protection", HeaderValue::from_static("1; mode=block"));
     headers.insert(
         header::REFERRER_POLICY,
         HeaderValue::from_static("strict-origin-when-cross-origin"),

@@ -22,13 +22,13 @@ jobs:
           - nightly
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
           components: rustfmt, clippy
-      
+
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
@@ -38,7 +38,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      
+
       - name: Cache cargo build
         uses: actions/cache@v4
         with:
@@ -46,21 +46,21 @@ jobs:
           key: ${{ runner.os }}-cargo-build-${{ matrix.rust }}-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-build-${{ matrix.rust }}-
-      
+
       - name: Check formatting
         run: cargo fmt -- --check
         if: matrix.rust == 'stable'
-      
+
       - name: Run clippy
         run: cargo clippy -- -D warnings
         if: matrix.rust == 'stable'
-      
+
       - name: Build
         run: cargo build --verbose
-      
+
       - name: Run tests
         run: cargo test --verbose
-      
+
       - name: Build release
         run: cargo build --release --verbose
         if: matrix.rust == 'stable'
@@ -71,11 +71,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust 1.70
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: "1.70"
-      
+
       - name: Check MSRV
         run: cargo check --verbose
+
+  # Security scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better secret detection
+
+      # Scan for secrets with gitleaks
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Cargo audit for vulnerable dependencies
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run cargo audit
+        run: cargo audit
+
+      # Check for common security issues
+      - name: Security lints
+        run: |
+          # Check for hardcoded credentials patterns
+          ! grep -r -E "(password|secret|token|key)\s*=\s*[\"'][^\"']+[\"']" src/ --include="*.rs" || {
+            echo "Found potential hardcoded credentials"
+            exit 1
+          }
+
+          # Check for unsafe code
+          ! grep -r "unsafe" src/ --include="*.rs" || {
+            echo "Found unsafe code - please ensure it's necessary and properly documented"
+          }

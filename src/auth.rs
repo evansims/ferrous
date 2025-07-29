@@ -85,6 +85,18 @@ impl AuthConfig {
     }
 }
 
+impl From<&crate::config::AuthConfig> for AuthConfig {
+    fn from(config: &crate::config::AuthConfig) -> Self {
+        Self {
+            enabled: config.enabled,
+            jwks_urls: config.jwks_urls.clone(),
+            audience: config.audience.clone(),
+            issuer: config.issuer.clone(),
+            jwks_cache_duration: Duration::from_secs(config.jwks_cache_seconds),
+        }
+    }
+}
+
 /// JWKS cache entry
 struct JwksCache {
     jwks: JwkSet,
@@ -206,9 +218,7 @@ impl JwtValidator {
             }
         }
 
-        Err(AuthError::InvalidToken(
-            "No matching key found in JWKS".to_string(),
-        ))
+        Err(AuthError::InvalidToken("No matching key found in JWKS".to_string()))
     }
 }
 
@@ -369,16 +379,12 @@ pub async fn validate_client_assertion(
 
     // Check that sub and iss match client_id
     if token_data.claims.sub != client_id {
-        return Err(AuthError::InvalidToken(
-            "Client ID mismatch in sub claim".to_string(),
-        ));
+        return Err(AuthError::InvalidToken("Client ID mismatch in sub claim".to_string()));
     }
 
     if let Some(iss) = &token_data.claims.iss {
         if iss != client_id {
-            return Err(AuthError::InvalidToken(
-                "Client ID mismatch in iss claim".to_string(),
-            ));
+            return Err(AuthError::InvalidToken("Client ID mismatch in iss claim".to_string()));
         }
     }
 

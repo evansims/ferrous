@@ -1,0 +1,25 @@
+# Rust formatting configuration
+# Using only stable features
+
+# Maximum line width
+max_width = 100
+
+# Use Unix-style line endings
+newline_style = "Unix"
+
+# Use spaces for indentation
+hard_tabs = false
+tab_spaces = 4
+
+# Function parameters
+fn_params_layout = "Tall"
+fn_call_width = 80
+
+# Use field init shorthand
+use_field_init_shorthand = true
+
+# Use try shorthand
+use_try_shorthand = true
+
+# Edition
+edition = "2021"

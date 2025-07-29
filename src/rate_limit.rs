@@ -59,6 +59,16 @@ impl RateLimitConfig {
     }
 }
 
+impl From<&crate::config::RateLimitConfig> for RateLimitConfig {
+    fn from(config: &crate::config::RateLimitConfig) -> Self {
+        Self {
+            max_requests: config.max_requests as u32,
+            window_duration: Duration::from_secs(config.window_seconds),
+            enabled: config.enabled,
+        }
+    }
+}
+
 /// Simple in-memory rate limiter
 #[derive(Clone)]
 pub struct RateLimiter {
@@ -82,11 +92,7 @@ impl RateLimiter {
 
     async fn check_rate_limit(&self, ip: IpAddr) -> Result<(u32, u32, Instant), StatusCode> {
         if !self.config.enabled {
-            return Ok((
-                self.config.max_requests,
-                0,
-                Instant::now() + self.config.window_duration,
-            ));
+            return Ok((self.config.max_requests, 0, Instant::now() + self.config.window_duration));
         }
 
         let mut windows = self.windows.lock().await;
@@ -129,10 +135,7 @@ pub async fn rate_limit_middleware(
             let headers = response.headers_mut();
 
             // Add rate limit headers
-            headers.insert(
-                "X-RateLimit-Limit",
-                HeaderValue::from_str(&limit.to_string()).unwrap(),
-            );
+            headers.insert("X-RateLimit-Limit", HeaderValue::from_str(&limit.to_string()).unwrap());
             headers.insert(
                 "X-RateLimit-Remaining",
                 HeaderValue::from_str(&remaining.to_string()).unwrap(),

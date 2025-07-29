@@ -173,10 +173,7 @@ mod tests {
 
         let updated = repo.update(&created.id, update_request).await.unwrap();
         assert_eq!(updated.name, "Updated Name");
-        assert_eq!(
-            updated.description,
-            Some("Original Description".to_string())
-        );
+        assert_eq!(updated.description, Some("Original Description".to_string()));
         assert!(updated.updated_at > original_updated_at);
     }
 

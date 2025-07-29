@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  estuary:
+    image: ${DOCKER_REGISTRY:-docker.io}/estuary:${VERSION:-latest}
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_PROFILE=production
+      - PORT=3000
+      - DATABASE_TYPE=${DATABASE_TYPE}
+      - CONVEX_DEPLOYMENT_URL=${CONVEX_DEPLOYMENT_URL}
+      - RUST_LOG=estuary=info,tower_http=warn
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - RATE_LIMIT_WINDOW_SECONDS=60
+      - AUTH_ENABLED=${AUTH_ENABLED:-true}
+      - AUTH_JWKS_URLS=${AUTH_JWKS_URLS}
+      - AUTH_AUDIENCE=${AUTH_AUDIENCE}
+      - AUTH_ISSUER=${AUTH_ISSUER}
+      - SECURITY_STRICT_MODE=true
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    networks:
+      - estuary-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - estuary
+    networks:
+      - estuary-network
+    restart: always
+
+  # Monitoring stack can be deployed separately
+  # See monitoring/docker-compose.monitoring.yml
+
+networks:
+  estuary-network:
+    driver: overlay
+    attachable: true

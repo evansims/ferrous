@@ -8,10 +8,5 @@ use axum::{
 pub async fn metrics_handler() -> Result<Response, StatusCode> {
     let metrics = get_metrics();
 
-    Ok((
-        StatusCode::OK,
-        [(CONTENT_TYPE, "text/plain; version=0.0.4")],
-        metrics,
-    )
-        .into_response())
+    Ok((StatusCode::OK, [(CONTENT_TYPE, "text/plain; version=0.0.4")], metrics).into_response())
 }

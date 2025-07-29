@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+target/
+Cargo.lock
+
+# Development files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Testing
+tests/
+benches/
+
+# Kubernetes and Docker files
+k8s/
+docker-compose*.yml
+Dockerfile*
+
+# Monitoring
+monitoring/
+nginx/
+
+# MacOS
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log

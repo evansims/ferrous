@@ -1,0 +1,35 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'estuary-monitor'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Estuary metrics
+  - job_name: 'estuary'
+    static_configs:
+      - targets: ['estuary:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node exporter for host metrics (optional)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']

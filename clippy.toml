@@ -1,0 +1,26 @@
+# Clippy configuration
+# See: https://rust-lang.github.io/rust-clippy/master/index.html
+
+# Deny certain lints in CI
+msrv = "1.70.0"
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 30
+
+# Maximum number of lines in a function
+too-many-lines-threshold = 100
+
+# Maximum number of arguments to a function
+too-many-arguments-threshold = 7
+
+# Type complexity threshold
+type-complexity-threshold = 250
+
+# Allowed types in vec! macro
+vec-box-size-threshold = 4096
+
+# Enum variant name threshold
+enum-variant-name-threshold = 3
+
+# Maximum single char binding names (allow 'e' for error)
+single-char-binding-names-threshold = 4

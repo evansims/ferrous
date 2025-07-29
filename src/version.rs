@@ -196,14 +196,8 @@ mod tests {
 
     #[test]
     fn test_extract_version_from_path() {
-        assert_eq!(
-            extract_version_from_path("/api/v1/items"),
-            Some("v1".to_string())
-        );
-        assert_eq!(
-            extract_version_from_path("/api/v2/items"),
-            Some("v2".to_string())
-        );
+        assert_eq!(extract_version_from_path("/api/v1/items"), Some("v1".to_string()));
+        assert_eq!(extract_version_from_path("/api/v2/items"), Some("v2".to_string()));
         assert_eq!(extract_version_from_path("/api/items"), None);
         assert_eq!(extract_version_from_path("/health"), None);
     }
@@ -230,10 +224,7 @@ mod tests {
         assert_eq!(version, ApiVersion::V1);
 
         // Test Accept header when no path version
-        headers.insert(
-            "accept",
-            HeaderValue::from_static("application/vnd.estuary.v1+json"),
-        );
+        headers.insert("accept", HeaderValue::from_static("application/vnd.estuary.v1+json"));
         let version = extract_version("/items", &headers);
         assert_eq!(version, ApiVersion::V1);
 

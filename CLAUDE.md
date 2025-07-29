@@ -75,14 +75,14 @@ The service follows a modular architecture with clear separation of concerns:
 
 ### Key Design Patterns
 
-1. **Database Abstraction**: 
+1. **Database Abstraction**:
    - Repository pattern with `Database` trait and `ItemRepository`
    - Swappable implementations via `DatabaseFactory`
    - Currently supports in-memory storage, easily extensible
 
 2. **State Management**: `SharedState` holds `Arc<dyn Database>` for database access
 
-3. **Error Handling**: 
+3. **Error Handling**:
    - Centralized through `AppError` enum that implements `IntoResponse`
    - Database errors automatically map to appropriate HTTP status codes
    - All handlers return `AppResult<T>`
@@ -90,8 +90,8 @@ The service follows a modular architecture with clear separation of concerns:
 4. **Middleware Stack**: Applied in `middleware::add_middleware()`:
    - TraceLayer (outermost) - HTTP request/response logging
    - CorsLayer - Enables cross-origin requests
-   
-5. **Type Organization**: 
+
+5. **Type Organization**:
    - Models: `Item`, `CreateItemRequest`, `UpdateItemRequest` in `models/`
    - Repositories: `ItemRepository` trait in `database/repositories/`
    - Database implementations: `InMemoryDatabase` in `database/implementations/`

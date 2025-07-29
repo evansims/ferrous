@@ -74,9 +74,7 @@ impl ItemRepository for ConvexItemRepository {
                     .map_err(|e| DatabaseError::SerializationError(e.to_string()))?;
                 Ok(items)
             }
-            _ => Err(DatabaseError::SerializationError(
-                "Unexpected result format".to_string(),
-            )),
+            _ => Err(DatabaseError::SerializationError("Unexpected result format".to_string())),
         }
     }
 
@@ -92,9 +90,7 @@ impl ItemRepository for ConvexItemRepository {
         // Extract count from result
         match result {
             FunctionResult::Value(Value::Float64(n)) => Ok(n as usize),
-            _ => Err(DatabaseError::SerializationError(
-                "Invalid count format".to_string(),
-            )),
+            _ => Err(DatabaseError::SerializationError("Invalid count format".to_string())),
         }
     }
 
@@ -117,9 +113,7 @@ impl ItemRepository for ConvexItemRepository {
                     .map_err(|e| DatabaseError::SerializationError(e.to_string()))?;
                 Ok(item)
             }
-            _ => Err(DatabaseError::SerializationError(
-                "Unexpected result format".to_string(),
-            )),
+            _ => Err(DatabaseError::SerializationError("Unexpected result format".to_string())),
         }
     }
 
@@ -144,9 +138,7 @@ impl ItemRepository for ConvexItemRepository {
                     .map_err(|e| DatabaseError::SerializationError(e.to_string()))?;
                 Ok(item)
             }
-            _ => Err(DatabaseError::SerializationError(
-                "Unexpected result format".to_string(),
-            )),
+            _ => Err(DatabaseError::SerializationError("Unexpected result format".to_string())),
         }
     }
 
@@ -175,9 +167,7 @@ impl ItemRepository for ConvexItemRepository {
                     .map_err(|e| DatabaseError::SerializationError(e.to_string()))?;
                 Ok(item)
             }
-            _ => Err(DatabaseError::SerializationError(
-                "Unexpected result format".to_string(),
-            )),
+            _ => Err(DatabaseError::SerializationError("Unexpected result format".to_string())),
         }
     }
 
@@ -195,9 +185,7 @@ impl ItemRepository for ConvexItemRepository {
         match result {
             FunctionResult::Value(Value::Null) => Err(DatabaseError::NotFound),
             FunctionResult::Value(_) => Ok(()),
-            _ => Err(DatabaseError::SerializationError(
-                "Unexpected result format".to_string(),
-            )),
+            _ => Err(DatabaseError::SerializationError("Unexpected result format".to_string())),
         }
     }
 }

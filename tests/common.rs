@@ -66,7 +66,6 @@ pub async fn create_test_app() -> axum::Router {
 }
 
 /// Create a GET request
-#[allow(dead_code)]
 pub fn get_request(uri: &str) -> Request<Body> {
     Request::builder()
         .method("GET")
@@ -87,7 +86,6 @@ pub fn post_request(uri: &str, json: serde_json::Value) -> Request<Body> {
 }
 
 /// Parse response body as JSON
-#[allow(dead_code)]
 pub async fn response_json<T>(response: axum::response::Response) -> T
 where
     T: serde::de::DeserializeOwned,

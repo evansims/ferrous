@@ -1,0 +1,55 @@
+# Pre-commit hooks for code quality and security
+# Install: pip install pre-commit && pre-commit install
+
+repos:
+  # Security: Detect secrets
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: |
+          (?x)^(
+            .*\.(lock|example)$|
+            docs/.*\.md$|
+            tests/.*\.rs$
+          )$
+
+  # Security: Scan for hardcoded secrets
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+
+  # Rust: Format check
+  - repo: local
+    hooks:
+      - id: rust-fmt
+        name: Rust Format
+        entry: cargo fmt -- --check
+        language: system
+        files: '\.rs$'
+        pass_filenames: false
+
+  # Rust: Clippy linting
+  - repo: local
+    hooks:
+      - id: rust-clippy
+        name: Rust Clippy
+        entry: cargo clippy -- -D warnings
+        language: system
+        files: '\.rs$'
+        pass_filenames: false
+
+  # General: Trailing whitespace
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: detect-private-key

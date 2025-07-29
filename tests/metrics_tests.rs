@@ -110,10 +110,7 @@ async fn test_metrics_tracking_business_operations() {
     // Delete the item
     let delete_response = app
         .clone()
-        .oneshot(common::delete_request(&format!(
-            "/api/v1/items/{}",
-            item_id
-        )))
+        .oneshot(common::delete_request(&format!("/api/v1/items/{}", item_id)))
         .await
         .unwrap();
     assert_eq!(delete_response.status(), StatusCode::NO_CONTENT);

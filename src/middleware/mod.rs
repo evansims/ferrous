@@ -1,6 +1,9 @@
 pub mod error;
 pub mod metrics;
 
+#[cfg(test)]
+mod tests;
+
 use crate::{
     auth::{AuthConfig, JwtValidator},
     rate_limit::{RateLimitConfig, RateLimiter},

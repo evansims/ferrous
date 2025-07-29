@@ -1,0 +1,192 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: estuary
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: estuary-config
+  namespace: estuary
+data:
+  APP_PROFILE: "production"
+  PORT: "3000"
+  DATABASE_TYPE: "convex"
+  RUST_LOG: "estuary=info,tower_http=warn"
+  RATE_LIMIT_ENABLED: "true"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  RATE_LIMIT_WINDOW_SECONDS: "60"
+  SECURITY_STRICT_MODE: "true"
+  AUTH_ENABLED: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: estuary-secrets
+  namespace: estuary
+type: Opaque
+stringData:
+  CONVEX_DEPLOYMENT_URL: "https://your-deployment.convex.cloud"
+  AUTH_JWKS_URLS: "https://your-auth-provider.com/.well-known/jwks.json"
+  AUTH_AUDIENCE: "https://api.yourdomain.com"
+  AUTH_ISSUER: "https://auth.yourdomain.com/"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: estuary
+  namespace: estuary
+  labels:
+    app: estuary
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: estuary
+  template:
+    metadata:
+      labels:
+        app: estuary
+    spec:
+      containers:
+      - name: estuary
+        image: your-registry/estuary:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: estuary-config
+        - secretRef:
+            name: estuary-secrets
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: estuary
+  namespace: estuary
+  labels:
+    app: estuary
+spec:
+  type: ClusterIP
+  selector:
+    app: estuary
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: estuary
+  namespace: estuary
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - api.yourdomain.com
+    secretName: estuary-tls
+  rules:
+  - host: api.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: estuary
+            port:
+              name: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: estuary
+  namespace: estuary
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: estuary
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: estuary
+  namespace: estuary
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: estuary

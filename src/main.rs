@@ -1,5 +1,8 @@
 use estuary::{
-    database::DatabaseFactory, handlers::health::APP_START_TIME, metrics, middleware, routes,
+    config::{secrets::SecretsManager, Config},
+    database::DatabaseFactory,
+    handlers::health::APP_START_TIME,
+    metrics, middleware, routes,
     state::AppState,
 };
 use std::{net::SocketAddr, time::Instant};
@@ -18,10 +21,36 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load .env file if it exists
     dotenvy::dotenv().ok();
 
-    // Initialize tracing
+    // Load and validate configuration
+    let config = match Config::load() {
+        Ok(cfg) => {
+            info!("Configuration loaded and validated successfully");
+            cfg
+        }
+        Err(e) => {
+            eprintln!("Failed to load configuration: {}", e);
+            return Err(e.into());
+        }
+    };
+
+    // Validate runtime dependencies
+    if let Err(e) = config.validate_runtime_dependencies() {
+        error!("Configuration runtime validation failed: {}", e);
+        return Err(e.into());
+    }
+
+    // Check for secrets in code (development helper)
+    if let Err(e) = SecretsManager::validate_no_secrets_in_code() {
+        warn!("Secrets validation warning: {}", e);
+    }
+
+    // Initialize tracing with configuration
     tracing_subscriber::registry()
         .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
+            config
+                .logging
+                .rust_log
+                .parse::<tracing_subscriber::EnvFilter>()
                 .unwrap_or_else(|_| "estuary=debug,tower_http=debug".into()),
         )
         .with(tracing_subscriber::fmt::layer())
@@ -45,18 +74,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Build application with routes and middleware
     let app = middleware::add_middleware(routes::create_routes(state));
 
-    // Configure socket address
-    let port = std::env::var("PORT")
-        .unwrap_or_else(|_| "3000".to_string())
-        .parse::<u16>()
-        .map_err(|e| {
-            format!(
-                "Invalid PORT value: {}. PORT must be a number between 0-65535",
-                e
-            )
-        })?;
-
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    // Configure socket address from validated config
+    let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
     info!("Starting server on http://{}", addr);
 
     // Start server
@@ -70,14 +89,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Server is ready to accept connections");
 
-    // Configure shutdown timeout
-    let _shutdown_timeout = std::env::var("SHUTDOWN_TIMEOUT_SECONDS")
-        .unwrap_or_else(|_| "30".to_string())
-        .parse::<u64>()
-        .unwrap_or(30);
-
-    // Create the server
-    let server = axum::serve(listener, app).with_graceful_shutdown(shutdown_signal());
+    // Create the server with configured shutdown
+    let shutdown_config = config.shutdown.clone();
+    let server =
+        axum::serve(listener, app).with_graceful_shutdown(shutdown_signal(shutdown_config));
 
     // Run the server
     info!("Server running. Press Ctrl+C to initiate graceful shutdown");
@@ -92,7 +107,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 /// Handle shutdown signals
-async fn shutdown_signal() {
+async fn shutdown_signal(shutdown_config: estuary::config::ShutdownConfig) {
     let ctrl_c = async {
         signal::ctrl_c()
             .await
@@ -119,5 +134,8 @@ async fn shutdown_signal() {
         },
     }
 
-    warn!("Shutdown signal received, waiting for existing connections to close...");
+    warn!(
+        "Shutdown signal received, waiting up to {} seconds for existing connections to close...",
+        shutdown_config.timeout_seconds
+    );
 }
