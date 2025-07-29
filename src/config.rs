@@ -128,7 +128,7 @@ impl Default for DatabaseConfig {
 impl Default for LoggingConfig {
     fn default() -> Self {
         Self {
-            rust_log: "estuary=debug,tower_http=debug".to_string(),
+            rust_log: "ferrous=debug,tower_http=debug".to_string(),
         }
     }
 }

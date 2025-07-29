@@ -95,7 +95,7 @@ async fn test_create_item_invalid_json() {
 #[tokio::test]
 async fn test_get_item() {
     let state = common::create_test_state();
-    let app = estuary::routes::create_routes(state.clone());
+    let app = ferrous::routes::create_routes(state.clone());
 
     // Create an item first
     let created =
@@ -130,7 +130,7 @@ async fn test_get_nonexistent_item() {
 #[tokio::test]
 async fn test_update_item() {
     let state = common::create_test_state();
-    let app = estuary::routes::create_routes(state.clone());
+    let app = ferrous::routes::create_routes(state.clone());
 
     // Create an item first
     let created =
@@ -172,7 +172,7 @@ async fn test_update_nonexistent_item() {
 #[tokio::test]
 async fn test_delete_item() {
     let state = common::create_test_state();
-    let app = estuary::routes::create_routes(state.clone());
+    let app = ferrous::routes::create_routes(state.clone());
 
     // Create an item first
     let created = common::create_test_item(&state.repo, "To Delete", None).await;
@@ -210,7 +210,7 @@ async fn test_delete_nonexistent_item() {
 #[tokio::test]
 async fn test_list_items() {
     let state = common::create_test_state();
-    let app = estuary::routes::create_routes(state.clone());
+    let app = ferrous::routes::create_routes(state.clone());
 
     // Create multiple items
     common::create_test_items(&state.repo, 5).await;
@@ -232,7 +232,7 @@ async fn test_list_items() {
 #[tokio::test]
 async fn test_list_items_with_pagination() {
     let state = common::create_test_state();
-    let app = estuary::routes::create_routes(state.clone());
+    let app = ferrous::routes::create_routes(state.clone());
 
     // Create multiple items
     common::create_test_items(&state.repo, 5).await;
@@ -443,7 +443,7 @@ async fn test_openapi_json_endpoint() {
 
     // Check OpenAPI structure
     assert_eq!(body["openapi"], "3.1.0");
-    assert_eq!(body["info"]["title"], "Estuary API");
+    assert_eq!(body["info"]["title"], "Ferrous API");
     assert_eq!(body["info"]["version"], env!("CARGO_PKG_VERSION"));
 
     // Check that paths are defined

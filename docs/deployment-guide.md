@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide covers deploying Estuary to production environments, including best practices, scaling considerations, and monitoring setup.
+This guide covers deploying Ferrous to production environments, including best practices, scaling considerations, and monitoring setup.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ This guide covers deploying Estuary to production environments, including best p
 
 ## Prerequisites
 
-Before deploying Estuary to production:
+Before deploying Ferrous to production:
 
 1. **Rust toolchain** (for building from source)
    ```bash
@@ -43,26 +43,26 @@ Build and deploy the binary directly:
 # Build release binary
 cargo build --release
 
-# The binary will be at ./target/release/estuary
-./target/release/estuary
+# The binary will be at ./target/release/ferrous
+./target/release/ferrous
 ```
 
 #### Systemd Service (Linux)
 
-Create `/etc/systemd/system/estuary.service`:
+Create `/etc/systemd/system/ferrous.service`:
 
 ```ini
 [Unit]
-Description=Estuary API Service
+Description=Ferrous API Service
 After=network.target
 
 [Service]
 Type=simple
-User=estuary
-WorkingDirectory=/opt/estuary
+User=ferrous
+WorkingDirectory=/opt/ferrous
 Environment="APP_PROFILE=production"
-EnvironmentFile=/opt/estuary/.env
-ExecStart=/opt/estuary/estuary
+EnvironmentFile=/opt/ferrous/.env
+ExecStart=/opt/ferrous/ferrous
 Restart=always
 RestartSec=10
 
@@ -71,7 +71,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/estuary/data
+ReadWritePaths=/opt/ferrous/data
 
 [Install]
 WantedBy=multi-user.target
@@ -79,9 +79,9 @@ WantedBy=multi-user.target
 
 Enable and start:
 ```bash
-sudo systemctl enable estuary
-sudo systemctl start estuary
-sudo systemctl status estuary
+sudo systemctl enable ferrous
+sudo systemctl start ferrous
+sudo systemctl status ferrous
 ```
 
 ### Option 2: Docker Container
@@ -100,7 +100,7 @@ See platform-specific guides in the [Cloud Platform Deployment](#cloud-platform-
 # Server Configuration
 APP_PROFILE=production
 PORT=3000
-RUST_LOG=estuary=info,tower_http=warn
+RUST_LOG=ferrous=info,tower_http=warn
 
 # Database (for Convex)
 DATABASE_TYPE=convex
@@ -130,7 +130,7 @@ SHUTDOWN_TIMEOUT_SECONDS=30
 TOKIO_WORKER_THREADS=4  # Default: number of CPU cores
 
 # Connection limits
-RUST_LOG=estuary=info,tower_http=warn,tokio=warn
+RUST_LOG=ferrous=info,tower_http=warn,tokio=warn
 ```
 
 ## Container Deployment
@@ -170,33 +170,33 @@ FROM alpine:3.18
 RUN apk add --no-cache ca-certificates
 
 # Create non-root user
-RUN addgroup -g 1001 estuary && \
-    adduser -D -u 1001 -G estuary estuary
+RUN addgroup -g 1001 ferrous && \
+    adduser -D -u 1001 -G ferrous ferrous
 
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /app/target/release/estuary /app/estuary
+COPY --from=builder /app/target/release/ferrous /app/ferrous
 
 # Copy any static files if needed
 # COPY --from=builder /app/static /app/static
 
 # Change ownership
-RUN chown -R estuary:estuary /app
+RUN chown -R ferrous:ferrous /app
 
-USER estuary
+USER ferrous
 
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health/live || exit 1
 
-CMD ["/app/estuary"]
+CMD ["/app/ferrous"]
 ```
 
 ### Docker Compose
 
-Estuary uses a modular Docker Compose structure for flexibility:
+Ferrous uses a modular Docker Compose structure for flexibility:
 
 #### File Structure
 - `docker-compose.yml` - Base configuration (common settings)
@@ -222,7 +222,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.monitoring.yml up -d
 
 # Scale the service
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --scale estuary=3
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --scale ferrous=3
 ```
 
 #### Configuration Examples
@@ -231,7 +231,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --scale es
 ```yaml
 version: '3.8'
 services:
-  estuary:
+  ferrous:
     ports:
       - "3000:3000"
     environment:
@@ -247,11 +247,11 @@ services:
 ```yaml
 version: '3.8'
 services:
-  estuary:
-    image: ${DOCKER_REGISTRY:-docker.io}/estuary:${VERSION:-latest}
+  ferrous:
+    image: ${DOCKER_REGISTRY:-docker.io}/ferrous:${VERSION:-latest}
     environment:
       - APP_PROFILE=production
-      - RUST_LOG=estuary=info,tower_http=warn
+      - RUST_LOG=ferrous=info,tower_http=warn
       - AUTH_ENABLED=true
     deploy:
       replicas: 3
@@ -287,22 +287,22 @@ Create Kubernetes manifests:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: estuary
+  name: ferrous
   labels:
-    app: estuary
+    app: ferrous
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: estuary
+      app: ferrous
   template:
     metadata:
       labels:
-        app: estuary
+        app: ferrous
     spec:
       containers:
-      - name: estuary
-        image: your-registry/estuary:latest
+      - name: ferrous
+        image: your-registry/ferrous:latest
         ports:
         - containerPort: 3000
         env:
@@ -312,9 +312,9 @@ spec:
           value: "3000"
         envFrom:
         - configMapRef:
-            name: estuary-config
+            name: ferrous-config
         - secretRef:
-            name: estuary-secrets
+            name: ferrous-secrets
         resources:
           requests:
             memory: "128Mi"
@@ -338,10 +338,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: estuary
+  name: ferrous
 spec:
   selector:
-    app: estuary
+    app: ferrous
   ports:
   - port: 80
     targetPort: 3000
@@ -350,7 +350,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: estuary-config
+  name: ferrous-config
 data:
   DATABASE_TYPE: "convex"
   RATE_LIMIT_ENABLED: "true"
@@ -360,7 +360,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: estuary-secrets
+  name: ferrous-secrets
 type: Opaque
 stringData:
   CONVEX_DEPLOYMENT_URL: "https://your-deployment.convex.cloud"
@@ -379,22 +379,22 @@ kubectl apply -f deployment.yaml
 1. **Build and push image to ECR**:
    ```bash
    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-   docker build -t estuary .
-   docker tag estuary:latest $ECR_REGISTRY/estuary:latest
-   docker push $ECR_REGISTRY/estuary:latest
+   docker build -t ferrous .
+   docker tag ferrous:latest $ECR_REGISTRY/ferrous:latest
+   docker push $ECR_REGISTRY/ferrous:latest
    ```
 
 2. **Task Definition** (`task-definition.json`):
    ```json
    {
-     "family": "estuary",
+     "family": "ferrous",
      "networkMode": "awsvpc",
      "requiresCompatibilities": ["FARGATE"],
      "cpu": "256",
      "memory": "512",
      "containerDefinitions": [{
-       "name": "estuary",
-       "image": "${ECR_REGISTRY}/estuary:latest",
+       "name": "ferrous",
+       "image": "${ECR_REGISTRY}/ferrous:latest",
        "portMappings": [{
          "containerPort": 3000,
          "protocol": "tcp"
@@ -406,13 +406,13 @@ kubectl apply -f deployment.yaml
        "secrets": [
          {
            "name": "CONVEX_DEPLOYMENT_URL",
-           "valueFrom": "arn:aws:secretsmanager:region:account:secret:estuary/convex-url"
+           "valueFrom": "arn:aws:secretsmanager:region:account:secret:ferrous/convex-url"
          }
        ],
        "logConfiguration": {
          "logDriver": "awslogs",
          "options": {
-           "awslogs-group": "/ecs/estuary",
+           "awslogs-group": "/ecs/ferrous",
            "awslogs-region": "us-east-1",
            "awslogs-stream-prefix": "ecs"
          }
@@ -433,13 +433,13 @@ Deploy directly from source:
 
 ```bash
 # Build and deploy
-gcloud run deploy estuary \
+gcloud run deploy ferrous \
   --source . \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
   --set-env-vars="APP_PROFILE=production,DATABASE_TYPE=convex" \
-  --set-secrets="CONVEX_DEPLOYMENT_URL=estuary-convex-url:latest" \
+  --set-secrets="CONVEX_DEPLOYMENT_URL=ferrous-convex-url:latest" \
   --min-instances=1 \
   --max-instances=100 \
   --memory=512Mi \
@@ -450,14 +450,14 @@ gcloud run deploy estuary \
 
 ```bash
 # Create resource group
-az group create --name estuary-rg --location eastus
+az group create --name ferrous-rg --location eastus
 
 # Create container
 az container create \
-  --resource-group estuary-rg \
-  --name estuary \
-  --image your-registry.azurecr.io/estuary:latest \
-  --dns-name-label estuary-api \
+  --resource-group ferrous-rg \
+  --name ferrous \
+  --image your-registry.azurecr.io/ferrous:latest \
+  --dns-name-label ferrous-api \
   --ports 3000 \
   --environment-variables \
     APP_PROFILE=production \
@@ -470,7 +470,7 @@ az container create \
 
 ### Horizontal Scaling
 
-Estuary is designed to scale horizontally. Key considerations:
+Ferrous is designed to scale horizontally. Key considerations:
 
 1. **Stateless Design**: The application maintains no local state
 2. **Database Scaling**:
@@ -481,11 +481,11 @@ Estuary is designed to scale horizontally. Key considerations:
 ### Load Balancer Configuration (nginx)
 
 ```nginx
-upstream estuary_backend {
+upstream ferrous_backend {
     least_conn;
-    server estuary1:3000 max_fails=3 fail_timeout=30s;
-    server estuary2:3000 max_fails=3 fail_timeout=30s;
-    server estuary3:3000 max_fails=3 fail_timeout=30s;
+    server ferrous1:3000 max_fails=3 fail_timeout=30s;
+    server ferrous2:3000 max_fails=3 fail_timeout=30s;
+    server ferrous3:3000 max_fails=3 fail_timeout=30s;
 }
 
 server {
@@ -493,7 +493,7 @@ server {
     server_name api.yourdomain.com;
 
     location / {
-        proxy_pass http://estuary_backend;
+        proxy_pass http://ferrous_backend;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -510,7 +510,7 @@ server {
     }
 
     location /health {
-        proxy_pass http://estuary_backend/health;
+        proxy_pass http://ferrous_backend/health;
         access_log off;
     }
 }
@@ -524,12 +524,12 @@ server {
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: estuary-hpa
+  name: ferrous-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: estuary
+    name: ferrous
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -552,7 +552,7 @@ spec:
 For ECS services:
 ```json
 {
-  "ServiceName": "estuary",
+  "ServiceName": "ferrous",
   "TargetValue": 70.0,
   "PredefinedMetricType": "ECSServiceAverageCPUUtilization",
   "ScaleOutCooldown": 60,
@@ -574,9 +574,9 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'estuary'
+  - job_name: 'ferrous'
     static_configs:
-      - targets: ['estuary:3000']
+      - targets: ['ferrous:3000']
     metrics_path: '/metrics'
 ```
 
@@ -623,13 +623,13 @@ histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m]))
 
 `vector.toml`:
 ```toml
-[sources.estuary_logs]
+[sources.ferrous_logs]
 type = "docker_logs"
-include_images = ["estuary"]
+include_images = ["ferrous"]
 
 [transforms.parse_logs]
 type = "remap"
-inputs = ["estuary_logs"]
+inputs = ["ferrous_logs"]
 source = '''
 . = parse_json!(.message)
 .timestamp = to_timestamp!(.timestamp)
@@ -639,7 +639,7 @@ source = '''
 type = "elasticsearch"
 inputs = ["parse_logs"]
 endpoint = "http://elasticsearch:9200"
-index = "estuary-%Y.%m.%d"
+index = "ferrous-%Y.%m.%d"
 ```
 
 #### CloudWatch Logs (AWS)
@@ -649,7 +649,7 @@ index = "estuary-%Y.%m.%d"
   "logConfiguration": {
     "logDriver": "awslogs",
     "options": {
-      "awslogs-group": "/ecs/estuary",
+      "awslogs-group": "/ecs/ferrous",
       "awslogs-region": "us-east-1",
       "awslogs-stream-prefix": "ecs"
     }
@@ -663,7 +663,7 @@ Example Prometheus alerting rules:
 
 ```yaml
 groups:
-  - name: estuary
+  - name: ferrous
     rules:
       - alert: HighErrorRate
         expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
@@ -684,13 +684,13 @@ groups:
           description: "95th percentile response time is {{ $value }} seconds"
 
       - alert: DatabaseDown
-        expr: up{job="estuary"} == 0
+        expr: up{job="ferrous"} == 0
         for: 1m
         labels:
           severity: critical
         annotations:
-          summary: "Estuary instance down"
-          description: "Estuary instance {{ $labels.instance }} is down"
+          summary: "Ferrous instance down"
+          description: "Ferrous instance {{ $labels.instance }} is down"
 ```
 
 ## Security Checklist
@@ -751,7 +751,7 @@ For troubleshooting production issues:
 
 ```bash
 # Enable debug logging temporarily
-RUST_LOG=estuary=debug,tower_http=debug
+RUST_LOG=ferrous=debug,tower_http=debug
 
 # Enable backtrace for panics
 RUST_BACKTRACE=1
@@ -761,17 +761,17 @@ RUST_BACKTRACE=1
 
 1. **CPU Profiling with perf**:
    ```bash
-   perf record -g ./estuary
+   perf record -g ./ferrous
    perf report
    ```
 
 2. **Memory Profiling**:
    ```bash
    # Use valgrind
-   valgrind --leak-check=full ./estuary
+   valgrind --leak-check=full ./ferrous
 
    # Or use heaptrack
-   heaptrack ./estuary
+   heaptrack ./ferrous
    ```
 
 3. **Flame Graphs**:
@@ -786,13 +786,13 @@ RUST_BACKTRACE=1
 
 1. **Kubernetes**:
    ```bash
-   kubectl set image deployment/estuary estuary=your-registry/estuary:new-tag
-   kubectl rollout status deployment/estuary
+   kubectl set image deployment/ferrous ferrous=your-registry/ferrous:new-tag
+   kubectl rollout status deployment/ferrous
    ```
 
 2. **Docker Swarm**:
    ```bash
-   docker service update --image your-registry/estuary:new-tag estuary
+   docker service update --image your-registry/ferrous:new-tag ferrous
    ```
 
 3. **Manual**:

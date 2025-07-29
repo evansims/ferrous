@@ -1,6 +1,6 @@
 # API Reference
 
-This document describes the REST API endpoints provided by Estuary.
+This document describes the REST API endpoints provided by Ferrous.
 
 ## Base URL
 
@@ -424,7 +424,7 @@ The API supports flexible version negotiation through multiple methods. See the 
 
 **Version Specification Methods** (in order of precedence):
 1. **URL Path** (recommended): `/api/v1/items`
-2. **Accept Header**: `Accept: application/vnd.estuary.v1+json`
+2. **Accept Header**: `Accept: application/vnd.ferrous.v1+json`
 3. **Custom Header**: `X-API-Version: v1`
 
 **Default Behavior**: When no version is specified, the current stable version (`v1`) is used.
@@ -476,7 +476,7 @@ http_requests_total{endpoint="/api/v1/items",method="GET",status="200"} 42
 Add to your `prometheus.yml`:
 ```yaml
 scrape_configs:
-  - job_name: 'estuary'
+  - job_name: 'ferrous'
     static_configs:
       - targets: ['localhost:3000']
 ```

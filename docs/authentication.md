@@ -1,6 +1,6 @@
 # Authentication Guide
 
-Estuary supports JWT (JSON Web Token) authentication for secure API access.
+Ferrous supports JWT (JSON Web Token) authentication for secure API access.
 
 ## Overview
 

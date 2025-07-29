@@ -1,6 +1,6 @@
-# Convex Functions for Estuary
+# Convex Functions for Ferrous
 
-This directory contains the Convex functions required for the Estuary project's Convex database implementation.
+This directory contains the Convex functions required for the Ferrous project's Convex database implementation.
 
 ## Setup
 
@@ -164,7 +164,7 @@ To test the Convex implementation:
 1. Ensure your Convex functions are deployed
 2. Set `DATABASE_TYPE=convex` in your `.env` file
 3. Add your `CONVEX_DEPLOYMENT_URL`
-4. Run the Estuary server:
+4. Run the Ferrous server:
    ```bash
    cargo run
    ```

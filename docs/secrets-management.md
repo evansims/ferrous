@@ -1,10 +1,10 @@
 # Secrets Management Guide
 
-This document outlines best practices for managing secrets and sensitive configuration in Estuary.
+This document outlines best practices for managing secrets and sensitive configuration in Ferrous.
 
 ## Overview
 
-Estuary follows the principle of least privilege and secure-by-default configuration. All sensitive data should be provided through environment variables and never committed to the repository.
+Ferrous follows the principle of least privilege and secure-by-default configuration. All sensitive data should be provided through environment variables and never committed to the repository.
 
 ## What Are Secrets?
 
@@ -68,7 +68,7 @@ const jwtSecret = "my-secret-key"; // Never do this!
 
 ### 3. Validate Secret Format
 
-Estuary validates secrets at startup:
+Ferrous validates secrets at startup:
 
 - Checks for placeholder values (e.g., "changeme", "xxx", "example")
 - Ensures JWT_SECRET is provided when authentication is enabled
@@ -113,8 +113,8 @@ Use Docker secrets or environment variables:
 
 ```yaml
 services:
-  estuary:
-    image: estuary:latest
+  ferrous:
+    image: ferrous:latest
     environment:
       - DATABASE_TYPE=convex
     secrets:
@@ -136,7 +136,7 @@ Use Kubernetes Secrets:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: estuary-secrets
+  name: ferrous-secrets
 type: Opaque
 data:
   convex-url: <base64-encoded-url>
@@ -145,15 +145,15 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: estuary
+  name: ferrous
 spec:
   template:
     spec:
       containers:
-      - name: estuary
+      - name: ferrous
         envFrom:
         - secretRef:
-            name: estuary-secrets
+            name: ferrous-secrets
 ```
 
 ### Cloud Providers
@@ -177,7 +177,7 @@ spec:
 
 ### Startup Validation
 
-Estuary performs security checks at startup:
+Ferrous performs security checks at startup:
 
 ```rust
 // Automatic validation in Config::load()
@@ -266,7 +266,7 @@ If a secret is accidentally exposed:
 
 ## Configuration Profiles
 
-Estuary supports different configuration profiles:
+Ferrous supports different configuration profiles:
 
 ```bash
 # Development (default)

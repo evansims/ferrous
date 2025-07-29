@@ -1,6 +1,6 @@
-# Estuary
+# Ferrous
 
-A minimal, reliable REST API service built with Rust and Axum.
+This template provides a starting point for building your own REST API service using Rust and Axum. It's intended to provide a starting point for building your own APIs, using clean architecture and modular design following Rust best practices. Fork it and build something cool!
 
 ## Documentation
 
@@ -18,7 +18,7 @@ For comprehensive documentation, see the [docs](./docs/) directory:
 ```bash
 # Clone and enter the project
 git clone <repository-url>
-cd estuary
+cd ferrous
 
 # Copy environment configuration
 cp .env.example .env
@@ -80,7 +80,7 @@ See the [API Reference](./docs/api-reference.md) for detailed endpoint documenta
 
 ## Database Support
 
-Estuary supports multiple database backends through its abstraction layer:
+Ferrous supports multiple database backends through its abstraction layer:
 
 - **In-Memory** (default) - Fast development and testing
 - **Convex** - Serverless database with real-time sync
@@ -108,7 +108,7 @@ cargo test               # Run tests
 ## Project Structure
 
 ```
-estuary/
+ferrous/
 ├── src/                    # Source code
 │   ├── db.rs               # Database abstraction and implementations
 │   ├── handlers.rs         # HTTP request handlers

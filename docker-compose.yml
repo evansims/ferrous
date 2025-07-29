@@ -1,12 +1,12 @@
 services:
-  estuary:
+  ferrous:
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
       - DATABASE_TYPE=${DATABASE_TYPE:-memory}
       - CONVEX_DEPLOYMENT_URL=${CONVEX_DEPLOYMENT_URL}
-      - RUST_LOG=${RUST_LOG:-estuary=info,tower_http=warn}
+      - RUST_LOG=${RUST_LOG:-ferrous=info,tower_http=warn}
       - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-true}
       - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
       - RATE_LIMIT_WINDOW_SECONDS=${RATE_LIMIT_WINDOW_SECONDS:-60}

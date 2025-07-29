@@ -1,7 +1,7 @@
 # Test Suite Evaluation Summary
 
 ## Overview
-The Estuary test suite has been evaluated for accuracy, comprehensiveness, and adherence to best practices. Here's what was found and improved:
+The Ferrous test suite has been evaluated for accuracy, comprehensiveness, and adherence to best practices. Here's what was found and improved:
 
 ## Test Coverage Summary
 

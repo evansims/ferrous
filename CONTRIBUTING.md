@@ -1,6 +1,6 @@
-# Contributing to Estuary
+# Contributing to Ferrous
 
-Thank you for your interest in contributing to Estuary! We welcome contributions from the community and are grateful for any help you can provide.
+Thank you for your interest in contributing to Ferrous! We welcome contributions from the community and are grateful for any help you can provide.
 
 ## Table of Contents
 
@@ -29,12 +29,12 @@ By participating in this project, you agree to abide by our Code of Conduct:
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/your-username/estuary.git
-   cd estuary
+   git clone https://github.com/your-username/ferrous.git
+   cd ferrous
    ```
 3. **Add the upstream remote**:
    ```bash
-   git remote add upstream https://github.com/evansims/estuary.git
+   git remote add upstream https://github.com/evansims/ferrous.git
    ```
 
 ## Development Setup
@@ -144,7 +144,7 @@ We use standard Rust conventions and tools to maintain code quality:
 /// # Examples
 ///
 /// ```
-/// use estuary::models::Item;
+/// use ferrous::models::Item;
 ///
 /// let item = Item {
 ///     id: "123".to_string(),
@@ -355,7 +355,7 @@ What should happen instead.
 **Environment**
 - OS: [e.g., Ubuntu 20.04]
 - Rust version: [e.g., 1.70.0]
-- Estuary version: [e.g., 0.1.0]
+- Ferrous version: [e.g., 0.1.0]
 
 **Additional Context**
 Any other relevant information.
@@ -472,4 +472,4 @@ If you have questions about contributing:
 3. Ask in GitHub Discussions
 4. Open a new issue with the Question template
 
-Thank you for contributing to Estuary! 🚀
+Thank you for contributing to Ferrous! 🚀

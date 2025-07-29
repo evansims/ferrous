@@ -1,4 +1,4 @@
-use estuary::{
+use ferrous::{
     config::Config, db::create_repository, handlers::APP_START_TIME, metrics, middleware, routes,
     state::AppState,
 };
@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .logging
                 .rust_log
                 .parse::<tracing_subscriber::EnvFilter>()
-                .unwrap_or_else(|_| "estuary=debug,tower_http=debug".into()),
+                .unwrap_or_else(|_| "ferrous=debug,tower_http=debug".into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -93,7 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 /// Handle shutdown signals
-async fn shutdown_signal(shutdown_config: estuary::config::ShutdownConfig) {
+async fn shutdown_signal(shutdown_config: ferrous::config::ShutdownConfig) {
     let ctrl_c = async {
         signal::ctrl_c()
             .await

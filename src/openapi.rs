@@ -13,11 +13,11 @@ use utoipa::{
 #[derive(OpenApi)]
 #[openapi(
     info(
-        title = "Estuary API",
+        title = "Ferrous API",
         version = env!("CARGO_PKG_VERSION"),
         description = "A minimal REST API service built with Rust and Axum. This documentation is for API version v1.",
         contact(
-            name = "Estuary Team",
+            name = "Ferrous Team",
             email = "support@example.com",
         ),
         license(

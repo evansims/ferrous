@@ -2,7 +2,7 @@
 services:
   prometheus:
     image: prom/prometheus:latest
-    container_name: estuary-prometheus
+    container_name: ferrous-prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -17,7 +17,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: estuary-grafana
+    container_name: ferrous-grafana
     ports:
       - "3001:3000"
     volumes:

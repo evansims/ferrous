@@ -1,10 +1,10 @@
 # Production overrides - use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 services:
-  estuary:
-    image: ${DOCKER_REGISTRY:-docker.io}/estuary:${VERSION:-latest}
+  ferrous:
+    image: ${DOCKER_REGISTRY:-docker.io}/ferrous:${VERSION:-latest}
     environment:
       - APP_PROFILE=production
-      - RUST_LOG=estuary=info,tower_http=warn
+      - RUST_LOG=ferrous=info,tower_http=warn
       - RATE_LIMIT_MAX_REQUESTS=100
       - AUTH_ENABLED=true
       - SECURITY_STRICT_MODE=true

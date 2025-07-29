@@ -46,5 +46,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic health check endpoint
 - Environment-based configuration
 
-[Unreleased]: https://github.com/evansims/estuary/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/evansims/estuary/releases/tag/v0.1.0
+[Unreleased]: https://github.com/evansims/ferrous/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/evansims/ferrous/releases/tag/v0.1.0

@@ -1,5 +1,5 @@
 use axum::{body::Body, http::Request};
-use estuary::{
+use ferrous::{
     db::{InMemoryRepository, ItemRepository, MetricsRepository},
     models::{CreateItemRequest, Item},
     state::SharedState,
@@ -16,7 +16,7 @@ pub fn create_test_repo() -> Arc<dyn ItemRepository> {
 /// Create a test app state
 pub fn create_test_state() -> SharedState {
     let repo = create_test_repo();
-    estuary::state::AppState::shared(repo)
+    ferrous::state::AppState::shared(repo)
 }
 
 /// Create a test item request
@@ -58,11 +58,11 @@ pub async fn create_test_items(repo: &Arc<dyn ItemRepository>, count: usize) -> 
 /// Create a test app for integration testing
 pub async fn create_test_app() -> axum::Router {
     // Initialize metrics for tests
-    estuary::metrics::init_metrics();
+    ferrous::metrics::init_metrics();
 
     let state = create_test_state();
-    let app = estuary::routes::create_routes(state);
-    estuary::middleware::add_middleware(app)
+    let app = ferrous::routes::create_routes(state);
+    ferrous::middleware::add_middleware(app)
 }
 
 /// Create a GET request

@@ -33,23 +33,23 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user
-RUN addgroup -g 1001 estuary && \
-    adduser -D -u 1001 -G estuary estuary
+RUN addgroup -g 1001 ferrous && \
+    adduser -D -u 1001 -G ferrous ferrous
 
 # Create app directory
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /app/target/release/estuary /app/estuary
+COPY --from=builder /app/target/release/ferrous /app/ferrous
 
 # Ensure binary is executable
-RUN chmod +x /app/estuary
+RUN chmod +x /app/ferrous
 
 # Change ownership
-RUN chown -R estuary:estuary /app
+RUN chown -R ferrous:ferrous /app
 
 # Switch to non-root user
-USER estuary
+USER ferrous
 
 # Expose port
 EXPOSE 3000
@@ -59,8 +59,8 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health/live || exit 1
 
 # Set default environment variables
-ENV RUST_LOG=estuary=info,tower_http=warn
+ENV RUST_LOG=ferrous=info,tower_http=warn
 ENV APP_PROFILE=production
 
 # Run the binary
-CMD ["/app/estuary"]
+CMD ["/app/ferrous"]

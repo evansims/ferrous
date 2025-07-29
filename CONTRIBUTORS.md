@@ -1,6 +1,6 @@
 # Contributors
 
-This file recognizes the amazing people who have contributed to Estuary.
+This file recognizes the amazing people who have contributed to Ferrous.
 
 ## Core Maintainers
 
@@ -30,4 +30,4 @@ We value all contributions, whether they are:
 - Feature suggestions
 - Community support
 
-Thank you to everyone who has helped make Estuary better! 🎉
+Thank you to everyone who has helped make Ferrous better! 🎉

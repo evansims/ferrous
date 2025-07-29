@@ -1,10 +1,10 @@
 # API Versioning Strategy
 
-This document outlines Estuary's API versioning strategy, including version negotiation, deprecation policies, and migration guidelines.
+This document outlines Ferrous's API versioning strategy, including version negotiation, deprecation policies, and migration guidelines.
 
 ## Overview
 
-Estuary uses a pragmatic approach to API versioning that balances stability for existing clients with the ability to evolve the API over time. We follow semantic versioning principles adapted for REST APIs.
+Ferrous uses a pragmatic approach to API versioning that balances stability for existing clients with the ability to evolve the API over time. We follow semantic versioning principles adapted for REST APIs.
 
 ## Versioning Scheme
 
@@ -34,7 +34,7 @@ API versions follow the format `v{MAJOR}` where MAJOR is a positive integer:
 
 ## Version Negotiation
 
-Estuary supports three methods for API version negotiation, in order of precedence:
+Ferrous supports three methods for API version negotiation, in order of precedence:
 
 ### 1. URL Path Versioning (Recommended)
 
@@ -54,10 +54,10 @@ GET /api/v2/items
 
 Clients can specify the desired version using the Accept header:
 ```
-Accept: application/vnd.estuary.v2+json
+Accept: application/vnd.ferrous.v2+json
 ```
 
-**Format:** `application/vnd.estuary.v{VERSION}+json`
+**Format:** `application/vnd.ferrous.v{VERSION}+json`
 
 **Advantages:**
 - RESTful approach
@@ -120,7 +120,7 @@ X-API-Version: 2
      ```
      Sunset: Sat, 1 Jan 2025 00:00:00 GMT
      Deprecation: true
-     Link: <https://docs.estuary.com/migration/v2>; rel="successor-version"
+     Link: <https://docs.ferrous.com/migration/v2>; rel="successor-version"
      ```
 
 3. **Final Warning** (T+5 months)
@@ -137,7 +137,7 @@ X-API-Version: 2
 HTTP/1.1 200 OK
 Deprecation: true
 Sunset: Sat, 1 Jan 2025 00:00:00 GMT
-Link: <https://docs.estuary.com/migration/v2>; rel="successor-version"
+Link: <https://docs.ferrous.com/migration/v2>; rel="successor-version"
 Warning: 299 - "This API version is deprecated and will be removed on 2025-01-01"
 ```
 
@@ -174,7 +174,7 @@ pub const API_VERSION_DEPRECATED: &[&str] = &[];
 
 The API extracts version information in this order:
 1. URL path segment (e.g., `/api/v1/...`)
-2. Accept header (e.g., `application/vnd.estuary.v1+json`)
+2. Accept header (e.g., `application/vnd.ferrous.v1+json`)
 3. X-API-Version header
 4. Default to current version
 
@@ -191,16 +191,16 @@ Each API version has its own OpenAPI specification:
 
 ```bash
 # Good - Explicit version
-curl https://api.estuary.com/api/v1/items
+curl https://api.ferrous.com/api/v1/items
 
 # Avoid - Implicit version
-curl https://api.estuary.com/api/items
+curl https://api.ferrous.com/api/items
 ```
 
 ### Handle Deprecation Headers
 
 ```python
-response = requests.get('https://api.estuary.com/api/v1/items')
+response = requests.get('https://api.ferrous.com/api/v1/items')
 if response.headers.get('Deprecation') == 'true':
     sunset_date = response.headers.get('Sunset')
     logger.warning(f'API version will be removed on {sunset_date}')

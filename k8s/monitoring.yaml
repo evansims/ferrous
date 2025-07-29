@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prometheus
-  namespace: estuary
+  namespace: ferrous
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -29,13 +29,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prometheus
-  namespace: estuary
+  namespace: ferrous
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
-  namespace: estuary
+  namespace: ferrous
 data:
   prometheus.yml: |
     global:
@@ -43,16 +43,16 @@ data:
       evaluation_interval: 15s
 
     scrape_configs:
-      - job_name: 'estuary'
+      - job_name: 'ferrous'
         kubernetes_sd_configs:
         - role: pod
           namespaces:
             names:
-            - estuary
+            - ferrous
         relabel_configs:
         - source_labels: [__meta_kubernetes_pod_label_app]
           action: keep
-          regex: estuary
+          regex: ferrous
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: pod
         - source_labels: [__meta_kubernetes_namespace]
@@ -62,7 +62,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: prometheus
-  namespace: estuary
+  namespace: ferrous
 spec:
   serviceName: prometheus
   replicas: 1
@@ -114,7 +114,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
-  namespace: estuary
+  namespace: ferrous
 spec:
   selector:
     app: prometheus
@@ -126,7 +126,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: estuary
+  namespace: ferrous
 spec:
   replicas: 1
   selector:
@@ -179,7 +179,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: grafana-secrets
-  namespace: estuary
+  namespace: ferrous
 type: Opaque
 stringData:
   admin-password: "changeme"
@@ -188,7 +188,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-datasources
-  namespace: estuary
+  namespace: ferrous
 data:
   prometheus.yml: |
     apiVersion: 1
@@ -203,7 +203,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-dashboards-config
-  namespace: estuary
+  namespace: ferrous
 data:
   dashboards.yml: |
     apiVersion: 1
@@ -221,7 +221,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: grafana
-  namespace: estuary
+  namespace: ferrous
 spec:
   selector:
     app: grafana

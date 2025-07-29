@@ -1,12 +1,12 @@
 # Development overrides - automatically loaded by docker-compose
 services:
-  estuary:
+  ferrous:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       - APP_PROFILE=development
-      - RUST_LOG=estuary=debug,tower_http=debug
+      - RUST_LOG=ferrous=debug,tower_http=debug
       - RATE_LIMIT_MAX_REQUESTS=1000
       - AUTH_ENABLED=false
       - SECURITY_STRICT_MODE=false

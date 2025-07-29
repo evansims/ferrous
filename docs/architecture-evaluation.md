@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The Estuary codebase demonstrates both strengths and areas for improvement. While it follows many Rust best practices and has a clean modular structure, there are signs of over-engineering in some areas that violate the KISS principle.
+The Ferrous codebase demonstrates both strengths and areas for improvement. While it follows many Rust best practices and has a clean modular structure, there are signs of over-engineering in some areas that violate the KISS principle.
 
 ## KISS Principle Evaluation
 

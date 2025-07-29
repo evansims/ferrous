@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide will help you get Estuary up and running on your local machine.
+This guide will help you get Ferrous up and running on your local machine.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This guide will help you get Estuary up and running on your local machine.
 
 ```bash
 git clone <repository-url>
-cd estuary
+cd ferrous
 ```
 
 ### 2. Install Dependencies
@@ -59,7 +59,7 @@ cargo run
 make build
 
 # Run the release build
-./target/release/estuary
+./target/release/ferrous
 ```
 
 ## Configuration Options
@@ -73,7 +73,7 @@ Edit your `.env` file to configure the application:
 PORT=3000
 
 # Logging level
-RUST_LOG=estuary=debug,tower_http=debug
+RUST_LOG=ferrous=debug,tower_http=debug
 
 # Database type (memory, convex)
 DATABASE_TYPE=memory
@@ -115,7 +115,7 @@ curl http://localhost:3000/
 ```bash
 curl -X POST http://localhost:3000/api/v1/items \
   -H "Content-Type: application/json" \
-  -d '{"name": "My First Item", "description": "Testing Estuary"}'
+  -d '{"name": "My First Item", "description": "Testing Ferrous"}'
 ```
 
 ### List Items
@@ -160,7 +160,7 @@ The application uses structured logging. Adjust the log level in `.env`:
 
 ```env
 # Options: error, warn, info, debug, trace
-RUST_LOG=estuary=debug
+RUST_LOG=ferrous=debug
 ```
 
 ### 4. Run Tests

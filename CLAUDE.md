@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Estuary is a minimal REST API service built with Rust and Axum, designed for reliability and clean architecture.
+Ferrous is a minimal REST API service built with Rust and Axum, designed for reliability and clean architecture.
 
 ## Development Commands
 
@@ -41,7 +41,7 @@ cargo watch -c -x run
 
 # Run in release mode (optimized)
 cargo build --release
-./target/release/estuary
+./target/release/ferrous
 
 # Check for compilation errors without building
 cargo check
@@ -120,7 +120,7 @@ The service follows a modular architecture with clear separation of concerns:
 The application loads environment variables from `.env` file if present (using dotenvy).
 
 - `PORT`: Server port (default: `3000`)
-- `RUST_LOG`: Controls logging verbosity (default: `estuary=debug,tower_http=debug`)
+- `RUST_LOG`: Controls logging verbosity (default: `ferrous=debug,tower_http=debug`)
 
 See `.env.example` for additional configuration options that can be added in the future.
 

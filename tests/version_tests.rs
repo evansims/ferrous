@@ -24,7 +24,7 @@ async fn test_version_via_accept_header() {
     let mut request = common::get_request("/api/v1/items");
     request
         .headers_mut()
-        .insert("accept", HeaderValue::from_static("application/vnd.estuary.v1+json"));
+        .insert("accept", HeaderValue::from_static("application/vnd.ferrous.v1+json"));
 
     let response = app.oneshot(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
@@ -77,7 +77,7 @@ async fn test_unsupported_version_in_accept_header() {
     let mut request = common::get_request("/api/v1/items");
     request
         .headers_mut()
-        .insert("accept", HeaderValue::from_static("application/vnd.estuary.v99+json"));
+        .insert("accept", HeaderValue::from_static("application/vnd.ferrous.v99+json"));
 
     // Should fall back to default version since v99 doesn't exist
     let response = app.oneshot(request).await.unwrap();

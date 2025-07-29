@@ -1,6 +1,6 @@
-# Estuary Documentation
+# Ferrous Documentation
 
-Welcome to the Estuary project documentation. Estuary is a Rust-based web service designed to serve REST APIs with ultra-reliability, fault-tolerance, and resilience.
+Welcome to the Ferrous project documentation. Ferrous is a Rust-based web service designed to serve REST APIs with ultra-reliability, fault-tolerance, and resilience.
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ Welcome to the Estuary project documentation. Estuary is a Rust-based web servic
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd estuary
+cd ferrous
 
 # Copy environment configuration
 cp .env.example .env
@@ -38,7 +38,7 @@ make watch
 ## Project Structure
 
 ```
-estuary/
+ferrous/
 ├── src/
 │   ├── main.rs              # Application entry point
 │   ├── lib.rs               # Library root

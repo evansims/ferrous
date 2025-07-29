@@ -1,4 +1,4 @@
-use estuary::config::Config;
+use ferrous::config::Config;
 use std::env;
 use std::sync::Mutex;
 
@@ -23,7 +23,7 @@ fn test_config_default_values() {
     let config = Config::default();
     assert_eq!(config.server.port, 3000);
     assert_eq!(config.database.db_type, "memory");
-    assert_eq!(config.logging.rust_log, "estuary=debug,tower_http=debug");
+    assert_eq!(config.logging.rust_log, "ferrous=debug,tower_http=debug");
     assert_eq!(config.shutdown.timeout_seconds, 30);
 
     cleanup_env_vars();

@@ -1,6 +1,6 @@
 # Database Architecture
 
-Estuary uses a flexible database abstraction layer that allows switching between different database implementations without changing application code.
+Ferrous uses a flexible database abstraction layer that allows switching between different database implementations without changing application code.
 
 ## Overview
 

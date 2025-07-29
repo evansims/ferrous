@@ -436,7 +436,7 @@
   "refresh": "10s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": ["estuary"],
+  "tags": ["ferrous"],
   "templating": {
     "list": []
   },
@@ -446,7 +446,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Estuary Overview",
-  "uid": "estuary-overview",
+  "title": "Ferrous Overview",
+  "uid": "ferrous-overview",
   "version": 0
 }
