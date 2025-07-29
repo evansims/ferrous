@@ -1,6 +1,6 @@
 # Ferrous
 
-This template provides a starting point for building your own REST API service using Rust and Axum. It's intended to provide a starting point for building your own APIs, using clean architecture and modular design following Rust best practices. Fork it and build something cool!
+Skip the boilerplate. This Rust + Axum template gets you straight to building production-ready REST APIs with clean architecture and zero cruft. Clone, code, ship.
 
 ## Documentation
 
