@@ -53,7 +53,7 @@ pub struct HealthResponse {
 }
 
 /// Health status
-#[derive(Debug, Serialize, Deserialize, PartialEq, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, ToSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum HealthStatus {
     Healthy,
@@ -201,7 +201,7 @@ pub struct ListQuery {
     pub offset: usize,
 }
 
-fn default_limit() -> usize {
+const fn default_limit() -> usize {
     20
 }
 

@@ -67,7 +67,7 @@ pub struct ValidationError {
 }
 
 /// Machine-readable error codes
-#[derive(Debug, Serialize, Deserialize, Clone, ToSchema, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, ToSchema, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ErrorCode {
     // Client errors (4xx)

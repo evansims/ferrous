@@ -87,7 +87,7 @@ impl Config {
 
         // Validate
         config.validate().map_err(|e| ConfigError {
-            message: format!("Validation failed: {}", e),
+            message: format!("Validation failed: {e}"),
         })?;
 
         // Additional manual validations

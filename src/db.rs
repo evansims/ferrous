@@ -54,6 +54,7 @@ pub struct InMemoryRepository {
 }
 
 impl InMemoryRepository {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             data: Arc::new(RwLock::new(HashMap::new())),
@@ -179,7 +180,7 @@ impl ItemRepository for ConvexRepository {
     }
 }
 
-/// Metrics wrapper for ItemRepository
+/// Metrics wrapper for `ItemRepository`
 pub struct MetricsRepository {
     inner: Arc<dyn ItemRepository>,
 }
@@ -265,6 +266,7 @@ impl ItemRepository for MetricsRepository {
 }
 
 /// Factory function to create the appropriate repository based on config
+#[must_use]
 pub fn create_repository(config: &Config) -> Arc<dyn ItemRepository> {
     let base_repo: Arc<dyn ItemRepository> = match config.database.db_type.as_str() {
         "memory" => Arc::new(InMemoryRepository::new()),
