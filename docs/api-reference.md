@@ -416,11 +416,23 @@ CORS is enabled with permissive settings for development. Production deployments
 
 ## Versioning
 
-The API is versioned via the URL path. The current version is `v1`.
+The API supports flexible version negotiation through multiple methods. See the [API Versioning](./api-versioning.md) documentation for complete details.
 
-Example: `/api/v1/items`
+### Quick Summary
 
-Future versions will be available at `/api/v2/items`, etc.
+**Current Version**: `v1`
+
+**Version Specification Methods** (in order of precedence):
+1. **URL Path** (recommended): `/api/v1/items`
+2. **Accept Header**: `Accept: application/vnd.estuary.v1+json`
+3. **Custom Header**: `X-API-Version: v1`
+
+**Default Behavior**: When no version is specified, the current stable version (`v1`) is used.
+
+**Deprecation Policy**: 
+- Minimum 6 months notice before removing a version
+- Deprecation headers will be added to responses
+- See [API Versioning](./api-versioning.md) for full deprecation timeline
 
 ## Metrics
 

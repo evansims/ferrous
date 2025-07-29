@@ -7,10 +7,7 @@ mod common;
 async fn test_metrics_endpoint_exists() {
     let app = common::create_test_app().await;
 
-    let response = app
-        .oneshot(common::get_request("/metrics"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/metrics")).await.unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
 
@@ -42,10 +39,7 @@ async fn test_metrics_content() {
         .unwrap();
 
     // Get metrics
-    let response = app
-        .oneshot(common::get_request("/metrics"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/metrics")).await.unwrap();
 
     let body = common::response_body_string(response).await;
 
@@ -55,7 +49,7 @@ async fn test_metrics_content() {
     assert!(body.contains("# TYPE database_query_duration_seconds histogram"));
     assert!(body.contains("# TYPE database_queries_total counter"));
     assert!(body.contains("# TYPE database_connections_active gauge"));
-    
+
     // Business metrics will only appear after they've been incremented
     // We'll test those separately in test_metrics_tracking_business_operations
 }
@@ -74,10 +68,7 @@ async fn test_metrics_tracking_http_requests() {
     }
 
     // Get metrics
-    let response = app
-        .oneshot(common::get_request("/metrics"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/metrics")).await.unwrap();
 
     let body = common::response_body_string(response).await;
 
@@ -119,16 +110,16 @@ async fn test_metrics_tracking_business_operations() {
     // Delete the item
     let delete_response = app
         .clone()
-        .oneshot(common::delete_request(&format!("/api/v1/items/{}", item_id)))
+        .oneshot(common::delete_request(&format!(
+            "/api/v1/items/{}",
+            item_id
+        )))
         .await
         .unwrap();
     assert_eq!(delete_response.status(), StatusCode::NO_CONTENT);
 
     // Get metrics
-    let response = app
-        .oneshot(common::get_request("/metrics"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/metrics")).await.unwrap();
 
     let body = common::response_body_string(response).await;
 
@@ -150,10 +141,7 @@ async fn test_metrics_database_operations() {
         .unwrap();
 
     // Get metrics
-    let response = app
-        .oneshot(common::get_request("/metrics"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/metrics")).await.unwrap();
 
     let body = common::response_body_string(response).await;
 

@@ -17,8 +17,8 @@ use utoipa::{
 #[openapi(
     info(
         title = "Estuary API",
-        version = "1.0.0",
-        description = "A minimal REST API service built with Rust and Axum",
+        version = env!("CARGO_PKG_VERSION"),
+        description = "A minimal REST API service built with Rust and Axum. This documentation is for API version v1.",
         contact(
             name = "Estuary Team",
             email = "support@example.com",

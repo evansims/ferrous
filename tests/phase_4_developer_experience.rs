@@ -20,7 +20,7 @@ async fn test_openapi_json_endpoint() {
     // Check OpenAPI structure
     assert_eq!(body["openapi"], "3.1.0");
     assert_eq!(body["info"]["title"], "Estuary API");
-    assert_eq!(body["info"]["version"], "1.0.0");
+    assert_eq!(body["info"]["version"], env!("CARGO_PKG_VERSION"));
 
     // Check that paths are defined
     assert!(body["paths"].is_object());
@@ -33,7 +33,6 @@ async fn test_openapi_json_endpoint() {
     assert!(body["components"]["schemas"]["Item"].is_object());
     assert!(body["components"]["schemas"]["ErrorResponse"].is_object());
 }
-
 
 #[tokio::test]
 async fn test_structured_error_response_format() {

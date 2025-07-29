@@ -83,16 +83,14 @@ impl CreateItemRequest {
     /// Sanitize the request data
     pub fn sanitize(mut self) -> Self {
         self.name = self.name.trim().to_string();
-        self.description = self
-            .description
-            .and_then(|d| {
-                let trimmed = d.trim();
-                if trimmed.is_empty() {
-                    None
-                } else {
-                    Some(trimmed.to_string())
-                }
-            });
+        self.description = self.description.and_then(|d| {
+            let trimmed = d.trim();
+            if trimmed.is_empty() {
+                None
+            } else {
+                Some(trimmed.to_string())
+            }
+        });
         self
     }
 }
@@ -101,16 +99,14 @@ impl UpdateItemRequest {
     /// Sanitize the request data
     pub fn sanitize(mut self) -> Self {
         self.name = self.name.map(|n| n.trim().to_string());
-        self.description = self
-            .description
-            .and_then(|d| {
-                let trimmed = d.trim();
-                if trimmed.is_empty() {
-                    None
-                } else {
-                    Some(trimmed.to_string())
-                }
-            });
+        self.description = self.description.and_then(|d| {
+            let trimmed = d.trim();
+            if trimmed.is_empty() {
+                None
+            } else {
+                Some(trimmed.to_string())
+            }
+        });
         self
     }
 }

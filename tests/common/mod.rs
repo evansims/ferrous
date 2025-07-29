@@ -1,6 +1,6 @@
 use axum::{body::Body, http::Request};
 use estuary::{
-    database::{Database, MetricsDatabase, implementations::in_memory::InMemoryDatabase},
+    database::{implementations::in_memory::InMemoryDatabase, Database, MetricsDatabase},
     models::{CreateItemRequest, Item},
     state::SharedState,
 };
@@ -20,6 +20,7 @@ pub fn create_test_state() -> SharedState {
 }
 
 /// Create a test item request
+#[allow(dead_code)]
 pub fn create_test_item_request(name: &str, description: Option<&str>) -> CreateItemRequest {
     CreateItemRequest {
         name: name.to_string(),
@@ -28,6 +29,7 @@ pub fn create_test_item_request(name: &str, description: Option<&str>) -> Create
 }
 
 /// Create and insert a test item into the database
+#[allow(dead_code)]
 pub async fn create_test_item(
     db: &Arc<dyn Database>,
     name: &str,
@@ -38,6 +40,7 @@ pub async fn create_test_item(
 }
 
 /// Create multiple test items
+#[allow(dead_code)]
 pub async fn create_test_items(db: &Arc<dyn Database>, count: usize) -> Vec<Item> {
     let mut items = Vec::new();
     for i in 0..count {
@@ -56,13 +59,14 @@ pub async fn create_test_items(db: &Arc<dyn Database>, count: usize) -> Vec<Item
 pub async fn create_test_app() -> axum::Router {
     // Initialize metrics for tests
     estuary::metrics::init_metrics();
-    
+
     let state = create_test_state();
     let app = estuary::routes::create_routes(state);
     estuary::middleware::add_middleware(app)
 }
 
 /// Create a GET request
+#[allow(dead_code)]
 pub fn get_request(uri: &str) -> Request<Body> {
     Request::builder()
         .method("GET")
@@ -72,6 +76,7 @@ pub fn get_request(uri: &str) -> Request<Body> {
 }
 
 /// Create a POST request with JSON body
+#[allow(dead_code)]
 pub fn post_request(uri: &str, json: serde_json::Value) -> Request<Body> {
     Request::builder()
         .method("POST")
@@ -82,6 +87,7 @@ pub fn post_request(uri: &str, json: serde_json::Value) -> Request<Body> {
 }
 
 /// Parse response body as JSON
+#[allow(dead_code)]
 pub async fn response_json<T>(response: axum::response::Response) -> T
 where
     T: serde::de::DeserializeOwned,
@@ -93,6 +99,7 @@ where
 }
 
 /// Create a PUT request with JSON body
+#[allow(dead_code)]
 pub fn put_request(uri: &str, json: serde_json::Value) -> Request<Body> {
     Request::builder()
         .method("PUT")
@@ -103,6 +110,7 @@ pub fn put_request(uri: &str, json: serde_json::Value) -> Request<Body> {
 }
 
 /// Create a DELETE request
+#[allow(dead_code)]
 pub fn delete_request(uri: &str) -> Request<Body> {
     Request::builder()
         .method("DELETE")
@@ -112,6 +120,7 @@ pub fn delete_request(uri: &str) -> Request<Body> {
 }
 
 /// Get response body as string
+#[allow(dead_code)]
 pub async fn response_body_string(response: axum::response::Response) -> String {
     let body = axum::body::to_bytes(response.into_body(), usize::MAX)
         .await

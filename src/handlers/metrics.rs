@@ -6,7 +6,6 @@ use axum::{
 
 /// Prometheus metrics endpoint
 pub async fn metrics_handler() -> Result<Response, StatusCode> {
-
     let metrics = get_metrics();
 
     Ok((

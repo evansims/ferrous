@@ -92,12 +92,12 @@ This document tracks planned improvements and enhancements for the Estuary proje
 ## 📝 Priority 4: Developer Experience
 
 ### 10. API Versioning Strategy
-**Status**: Not Started
+**Status**: Completed ✅
 **Why**: Need clear strategy for future API evolution
-- [ ] Document versioning approach
-- [ ] Add version negotiation
-- [ ] Plan deprecation strategy
-- [ ] Update API documentation
+- [x] Document versioning approach (URL path, Accept header, X-API-Version)
+- [x] Add version negotiation middleware
+- [x] Plan deprecation strategy (6-month minimum with headers)
+- [x] Update API documentation with versioning details
 
 ### 11. OpenAPI Documentation
 **Status**: Completed ✅
@@ -167,7 +167,7 @@ This document tracks planned improvements and enhancements for the Estuary proje
 1. **Phase 1** (Foundation): Tests (#1), Error Handling (#2) ✅
 2. **Phase 2** (Security): Input Validation (#3), Rate Limiting (#4), Security Headers (#7), JWKS Auth (#15) ✅
 3. **Phase 3** (Operations): Graceful Shutdown (#6), Health Endpoints (#8), Request Tracking (#5), Metrics (#9) ✅
-4. **Phase 4** (Developer Experience): OpenAPI (#11), Error Responses (#12) ✅
+4. **Phase 4** (Developer Experience): API Versioning (#10), OpenAPI (#11), Error Responses (#12) ✅
 5. **Phase 5** (Production Ready): Config Validation (#13), Deployment Docs (#16)
 
 ## Development Philosophy

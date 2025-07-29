@@ -8,6 +8,7 @@ For comprehensive documentation, see the [docs](./docs/) directory:
 
 - [Getting Started](./docs/getting-started.md) - Installation and setup guide
 - [API Reference](./docs/api-reference.md) - Complete API endpoint documentation
+- [API Versioning](./docs/api-versioning.md) - Version negotiation and deprecation strategy
 - [Authentication Guide](./docs/authentication.md) - JWT/JWKS authentication setup
 - [Database Documentation](./docs/database/) - Database architecture and implementations
 - [Architecture Overview](./docs/README.md) - Project structure and design decisions

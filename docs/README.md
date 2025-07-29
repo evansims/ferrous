@@ -7,6 +7,7 @@ Welcome to the Estuary project documentation. Estuary is a Rust-based web servic
 - [Getting Started](./getting-started.md)
 - [Architecture](./architecture.md)
 - [API Reference](./api-reference.md)
+- [API Versioning](./api-versioning.md)
 - [Authentication](./authentication.md)
 - [Database](./database/)
   - [Overview](./database/README.md)

@@ -5,6 +5,7 @@ use crate::{
     auth::{AuthConfig, JwtValidator},
     rate_limit::{RateLimitConfig, RateLimiter},
     request_id::request_id_middleware,
+    version::version_middleware,
 };
 use axum::{middleware, Router};
 use tower::ServiceBuilder;
@@ -22,6 +23,8 @@ pub fn add_middleware(app: Router) -> Router {
         ServiceBuilder::new()
             // Request ID tracking (outermost to generate ID first)
             .layer(middleware::from_fn(request_id_middleware))
+            // Version extraction and validation
+            .layer(middleware::from_fn(version_middleware))
             // Metrics collection
             .layer(middleware::from_fn(metrics::metrics_middleware))
             // Apply rate limiting

@@ -8,10 +8,7 @@ use axum::{
 };
 
 /// Middleware to track HTTP request metrics
-pub async fn metrics_middleware(
-    req: Request<Body>,
-    next: Next,
-) -> Result<Response, StatusCode> {
+pub async fn metrics_middleware(req: Request<Body>, next: Next) -> Result<Response, StatusCode> {
     let timer = Timer::new();
     let method = req.method().to_string();
     let path = req

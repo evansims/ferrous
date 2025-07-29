@@ -29,7 +29,12 @@ impl Database for MetricsDatabase {
     async fn health_check(&self) -> Result<(), DatabaseError> {
         let timer = Timer::new();
         let result = self.inner.health_check().await;
-        track_database_query("health_check", "database", result.is_ok(), timer.elapsed_seconds());
+        track_database_query(
+            "health_check",
+            "database",
+            result.is_ok(),
+            timer.elapsed_seconds(),
+        );
         result
     }
 
