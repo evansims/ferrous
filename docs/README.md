@@ -42,19 +42,28 @@ estuary/
 ├── src/
 │   ├── main.rs              # Application entry point
 │   ├── lib.rs               # Library root
-│   ├── routes.rs            # API route definitions
-│   ├── handlers/            # Request handlers
-│   ├── models/              # Data models
-│   ├── database/            # Database abstraction layer
-│   │   ├── mod.rs          # Database traits
-│   │   ├── repositories/   # Repository interfaces
-│   │   └── implementations/ # Database implementations
+│   ├── config.rs            # Configuration management
+│   ├── db.rs                # Database abstraction and implementations
+│   ├── error.rs             # Error handling
+│   ├── handlers.rs          # HTTP request handlers
+│   ├── metrics.rs           # Prometheus metrics
 │   ├── middleware/          # HTTP middleware
-│   ├── error.rs            # Error handling
-│   └── state.rs            # Application state
-├── convex/                  # Convex function examples
+│   │   ├── auth.rs         # JWT authentication
+│   │   ├── rate_limit.rs   # Rate limiting
+│   │   ├── security.rs     # Security headers
+│   │   └── ...             # Other middleware
+│   ├── models.rs            # Data models and DTOs
+│   ├── openapi.rs           # OpenAPI documentation
+│   ├── routes.rs            # API route definitions
+│   ├── state.rs             # Application state
+│   └── validation.rs        # Input validation
+├── convex/                  # Convex database functions
 ├── docs/                    # Documentation
+├── monitoring/              # Prometheus and Grafana configs
 ├── .github/                 # GitHub workflows
+├── docker-compose.yml       # Base Docker configuration
+├── docker-compose.*.yml     # Environment-specific overrides
+├── Dockerfile              # Container image definition
 ├── Cargo.toml              # Rust dependencies
 ├── Makefile                # Build commands
 └── .env.example            # Environment configuration template
@@ -75,7 +84,7 @@ estuary/
 - **Request ID Tracking**: Unique request IDs for debugging and log correlation
 
 ### Security & Reliability
-- **JWKS Authentication**: JWT validation with support for multiple identity providers
+- **JWT Authentication**: Token-based authentication with configurable secret
 - **Rate Limiting**: Configurable per-IP rate limits with informative headers
 - **Security Headers**: Comprehensive security headers (CSP, HSTS, etc.)
 - **Graceful Shutdown**: Proper connection draining and shutdown handling

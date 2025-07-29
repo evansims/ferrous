@@ -110,12 +110,17 @@ cargo test               # Run tests
 ```
 estuary/
 ├── src/                     # Source code
-│   ├── database/           # Database abstraction layer
-│   ├── handlers/           # Request handlers
-│   ├── middleware/         # HTTP middleware
-│   └── models/             # Data models
+│   ├── db.rs               # Database abstraction and implementations
+│   ├── handlers.rs         # HTTP request handlers
+│   ├── middleware/         # HTTP middleware (auth, rate limit, etc.)
+│   ├── models.rs           # Data models and DTOs
+│   ├── config.rs           # Configuration management
+│   ├── error.rs            # Error types and handling
+│   ├── routes.rs           # API route definitions
+│   └── main.rs             # Application entry point
 ├── docs/                    # Documentation
-├── convex/                  # Convex function examples
+├── convex/                  # Convex database functions
+├── monitoring/              # Prometheus and Grafana configs
 └── .github/                 # CI/CD workflows
 ```
 

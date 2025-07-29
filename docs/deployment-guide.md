@@ -117,9 +117,7 @@ RATE_LIMIT_WINDOW_SECONDS=60
 
 # Authentication (if required)
 AUTH_ENABLED=true
-AUTH_JWKS_URLS=https://your-auth-provider.com/.well-known/jwks.json
-AUTH_AUDIENCE=https://api.yourdomain.com
-AUTH_ISSUER=https://auth.yourdomain.com/
+JWT_SECRET=your-secure-secret-key-here
 
 # Shutdown Grace Period
 SHUTDOWN_TIMEOUT_SECONDS=30
@@ -366,7 +364,7 @@ metadata:
 type: Opaque
 stringData:
   CONVEX_DEPLOYMENT_URL: "https://your-deployment.convex.cloud"
-  AUTH_JWKS_URLS: "https://your-auth.com/.well-known/jwks.json"
+  JWT_SECRET: "your-secure-secret-key-here"
 ```
 
 Apply with:
@@ -741,10 +739,10 @@ Before going to production:
 
 4. **JWT Validation Failures**
    ```bash
-   # Check JWKS endpoint accessibility
-   curl $AUTH_JWKS_URLS
+   # Verify JWT_SECRET is set correctly
+   echo $JWT_SECRET
 
-   # Verify audience and issuer match
+   # Test token validation with a known good token
    ```
 
 ### Debug Mode

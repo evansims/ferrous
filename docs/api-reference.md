@@ -491,9 +491,7 @@ The API behavior can be configured via environment variables. See `.env.example`
 
 #### Authentication
 - `AUTH_ENABLED` - Enable/disable JWT authentication (default: `false`)
-- `AUTH_JWKS_URLS` - Comma-separated list of JWKS endpoints
-- `AUTH_AUDIENCE` - Expected JWT audience claim
-- `AUTH_ISSUER` - Expected JWT issuer claim
+- `JWT_SECRET` - Secret key for JWT validation
 
 #### Rate Limiting
 - `RATE_LIMIT_ENABLED` - Enable/disable rate limiting (default: `true`)

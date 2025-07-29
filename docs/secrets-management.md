@@ -29,9 +29,7 @@ The following environment variables may contain sensitive data:
 CONVEX_DEPLOYMENT_URL=https://your-deployment.convex.cloud
 
 # Authentication Configuration
-AUTH_JWKS_URLS=https://your-auth-provider.com/.well-known/jwks.json
-AUTH_AUDIENCE=https://api.yourdomain.com
-AUTH_ISSUER=https://auth.yourdomain.com/
+JWT_SECRET=your-secret-key-here
 
 # Future: Additional secrets as needed
 ```
@@ -62,10 +60,10 @@ All secrets should be provided via environment variables:
 
 ```bash
 # Good - using environment variable
-export AUTH_JWKS_URLS="https://auth.example.com/.well-known/jwks.json"
+export JWT_SECRET="your-secure-secret-key"
 
 # Bad - hardcoding in code
-const jwksUrl = "https://auth.example.com/.well-known/jwks.json"; // Never do this!
+const jwtSecret = "my-secret-key"; // Never do this!
 ```
 
 ### 3. Validate Secret Format
@@ -73,7 +71,7 @@ const jwksUrl = "https://auth.example.com/.well-known/jwks.json"; // Never do th
 Estuary validates secrets at startup:
 
 - Checks for placeholder values (e.g., "changeme", "xxx", "example")
-- Validates URL formats for JWKS endpoints
+- Ensures JWT_SECRET is provided when authentication is enabled
 - Ensures required secrets are present when features are enabled
 
 ### 4. Secret Rotation
@@ -85,10 +83,11 @@ When rotating secrets:
 3. **Update all clients** to use the new secret
 4. **Remove the old secret** after confirming all clients are updated
 
-For JWKS rotation:
-- The JWKS endpoint should support multiple keys
-- Keys are cached for up to 1 hour (configurable via `AUTH_JWKS_CACHE_SECONDS`)
-- Old keys should remain valid during the rotation period
+For JWT secret rotation:
+- Generate a new strong secret
+- Update JWT_SECRET in your deployment
+- Restart the application
+- Issue new tokens with the new secret
 
 ### 5. Development vs Production
 
@@ -220,7 +219,7 @@ jobs:
       - name: Deploy
         env:
           CONVEX_DEPLOYMENT_URL: ${{ secrets.CONVEX_DEPLOYMENT_URL }}
-          AUTH_JWKS_URLS: ${{ secrets.AUTH_JWKS_URLS }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           # Deploy with secrets from GitHub Secrets
 ```
@@ -234,7 +233,7 @@ deploy:
     - deploy.sh
   variables:
     CONVEX_DEPLOYMENT_URL: $CONVEX_DEPLOYMENT_URL
-    AUTH_JWKS_URLS: $AUTH_JWKS_URLS
+    JWT_SECRET: $JWT_SECRET
 ```
 
 ## Secret Scanning

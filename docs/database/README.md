@@ -8,47 +8,37 @@ The database layer is built around Rust traits, providing a clean interface betw
 
 ### Core Components
 
-1. **Database Trait** (`src/database/mod.rs`)
-   - Main interface for database operations
-   - Provides access to repositories
-   - Handles health checks
-
-2. **Repository Pattern** (`src/database/repositories/`)
-   - Separate interfaces for each domain entity
-   - Currently implements `ItemRepository`
+1. **Repository Trait** (`src/db.rs`)
+   - `ItemRepository` trait defines the interface
    - Async operations using `async-trait`
+   - Includes health check capability
 
-3. **Implementations** (`src/database/implementations/`)
+2. **Implementations** (`src/db.rs`)
    - Concrete database implementations
    - Currently supports:
-     - In-memory storage
-     - [Convex](./convex.md)
+     - In-memory storage (`InMemoryDatabase`)
+     - [Convex](./convex.md) (`ConvexDatabase`)
 
-## Database Trait
+3. **Metrics Wrapper** (`src/db.rs`)
+   - `MetricsRepository` wraps any repository
+   - Tracks operation counts and latencies
+   - Transparent to application code
 
-```rust
-#[async_trait]
-pub trait Database: Send + Sync {
-    fn items(&self) -> Arc<dyn ItemRepository>;
-    async fn health_check(&self) -> Result<(), DatabaseError>;
-}
-```
-
-## Repository Pattern
-
-Each domain entity has its own repository trait:
+## Repository Trait
 
 ```rust
 #[async_trait]
 pub trait ItemRepository: Send + Sync {
-    async fn list(&self, limit: usize, offset: usize) -> DatabaseResult<Vec<Item>>;
-    async fn count(&self) -> DatabaseResult<usize>;
-    async fn get(&self, id: &str) -> DatabaseResult<Item>;
     async fn create(&self, request: CreateItemRequest) -> DatabaseResult<Item>;
+    async fn get(&self, id: &str) -> DatabaseResult<Item>;
     async fn update(&self, id: &str, request: UpdateItemRequest) -> DatabaseResult<Item>;
     async fn delete(&self, id: &str) -> DatabaseResult<()>;
+    async fn list(&self, limit: usize, offset: usize) -> DatabaseResult<Vec<Item>>;
+    async fn count(&self) -> DatabaseResult<usize>;
+    async fn health_check(&self) -> DatabaseResult<()>;
 }
 ```
+
 
 ## Configuration
 
@@ -87,7 +77,7 @@ pub enum DatabaseError {
 
 To add a new database implementation:
 
-1. Create a new module in `src/database/implementations/`
+1. Add your implementation to `src/db.rs`
 2. Implement the `Database` trait
 3. Implement all required repository traits
 4. Update `DatabaseFactory::create()` to handle the new database type
