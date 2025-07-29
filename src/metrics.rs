@@ -142,13 +142,19 @@ pub fn track_http_request(method: &str, endpoint: &str, status: u16, duration: f
 
 /// Track business metrics
 pub fn track_item_created() {
-    ITEMS_CREATED_COUNTER.with_label_values(&[] as &[&str]).inc();
+    ITEMS_CREATED_COUNTER
+        .with_label_values(&[] as &[&str])
+        .inc();
 }
 
 pub fn track_item_updated() {
-    ITEMS_UPDATED_COUNTER.with_label_values(&[] as &[&str]).inc();
+    ITEMS_UPDATED_COUNTER
+        .with_label_values(&[] as &[&str])
+        .inc();
 }
 
 pub fn track_item_deleted() {
-    ITEMS_DELETED_COUNTER.with_label_values(&[] as &[&str]).inc();
+    ITEMS_DELETED_COUNTER
+        .with_label_values(&[] as &[&str])
+        .inc();
 }
