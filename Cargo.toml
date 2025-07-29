@@ -18,12 +18,12 @@ dotenvy = "0.15"
 async-trait = "0.1"
 thiserror = "1.0"
 convex = "0.9"
-validator = { version = "0.18", features = ["derive"] }
+validator = { version = "0.20", features = ["derive"] }
 jsonwebtoken = "9.3"
 reqwest = { version = "0.12", features = ["json"] }
 base64 = "0.22"
 sysinfo = "0.31"
 num_cpus = "1.16"
 utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
-prometheus = "0.13"
+prometheus = "0.14"
 once_cell = "1.20"
