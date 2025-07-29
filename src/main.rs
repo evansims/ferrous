@@ -1,8 +1,5 @@
 use estuary::{
-    config::{secrets::SecretsManager, Config},
-    database::DatabaseFactory,
-    handlers::health::APP_START_TIME,
-    metrics, middleware, routes,
+    config::Config, db::create_repository, handlers::APP_START_TIME, metrics, middleware, routes,
     state::AppState,
 };
 use std::{net::SocketAddr, time::Instant};
@@ -39,10 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err(e.into());
     }
 
-    // Check for secrets in code (development helper)
-    if let Err(e) = SecretsManager::validate_no_secrets_in_code() {
-        warn!("Secrets validation warning: {}", e);
-    }
+    // Removed secrets validation - use external tools for secrets management
 
     // Initialize tracing with configuration
     tracing_subscriber::registry()
@@ -56,20 +50,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // Initialize database
-    let db = match DatabaseFactory::create().await {
-        Ok(db) => {
-            info!("Database initialized successfully");
-            db
-        }
-        Err(e) => {
-            error!("Failed to initialize database: {}", e);
-            return Err(format!("Database initialization failed: {}", e).into());
-        }
-    };
+    // Initialize repository
+    let repo = create_repository(&config);
+    info!("Repository initialized successfully");
 
     // Create shared application state
-    let state = AppState::shared(db);
+    let state = AppState::shared(repo);
 
     // Build application with routes and middleware
     let app = middleware::add_middleware(routes::create_routes(state));

@@ -1,22 +1,22 @@
 use axum::{body::Body, http::Request};
 use estuary::{
-    database::{implementations::in_memory::InMemoryDatabase, Database, MetricsDatabase},
+    db::{InMemoryRepository, ItemRepository, MetricsRepository},
     models::{CreateItemRequest, Item},
     state::SharedState,
 };
 use std::sync::Arc;
 
-/// Create a test database instance
-pub fn create_test_db() -> Arc<dyn Database> {
+/// Create a test repository instance
+pub fn create_test_repo() -> Arc<dyn ItemRepository> {
     // Wrap with metrics tracking like in production
-    let base_db = Arc::new(InMemoryDatabase::new());
-    Arc::new(MetricsDatabase::new(base_db))
+    let base_repo = Arc::new(InMemoryRepository::new());
+    Arc::new(MetricsRepository::new(base_repo))
 }
 
 /// Create a test app state
 pub fn create_test_state() -> SharedState {
-    let db = create_test_db();
-    estuary::state::AppState::shared(db)
+    let repo = create_test_repo();
+    estuary::state::AppState::shared(repo)
 }
 
 /// Create a test item request
@@ -28,24 +28,24 @@ pub fn create_test_item_request(name: &str, description: Option<&str>) -> Create
     }
 }
 
-/// Create and insert a test item into the database
+/// Create and insert a test item into the repository
 #[allow(dead_code)]
 pub async fn create_test_item(
-    db: &Arc<dyn Database>,
+    repo: &Arc<dyn ItemRepository>,
     name: &str,
     description: Option<&str>,
 ) -> Item {
     let request = create_test_item_request(name, description);
-    db.items().create(request).await.unwrap()
+    repo.create(request).await.unwrap()
 }
 
 /// Create multiple test items
 #[allow(dead_code)]
-pub async fn create_test_items(db: &Arc<dyn Database>, count: usize) -> Vec<Item> {
+pub async fn create_test_items(repo: &Arc<dyn ItemRepository>, count: usize) -> Vec<Item> {
     let mut items = Vec::new();
     for i in 0..count {
         let item = create_test_item(
-            db,
+            repo,
             &format!("Test Item {}", i),
             Some(&format!("Description for item {}", i)),
         )

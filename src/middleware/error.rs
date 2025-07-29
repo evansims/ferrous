@@ -1,6 +1,6 @@
 use crate::{
     error::{ErrorCode, ErrorDetails, ErrorResponse},
-    request_id::RequestId,
+    middleware::observability::RequestId,
 };
 use axum::{
     extract::Request,

@@ -13,22 +13,17 @@ use std::{
 };
 use tokio::sync::Mutex;
 
-/// Rate limit configuration
+/// Simple rate limiter configuration
 #[derive(Clone)]
 pub struct RateLimitConfig {
-    /// Maximum requests per window
-    pub max_requests: u32,
-    /// Time window duration
-    pub window_duration: Duration,
-    /// Whether rate limiting is enabled
+    pub requests_per_minute: u32,
     pub enabled: bool,
 }
 
 impl Default for RateLimitConfig {
     fn default() -> Self {
         Self {
-            max_requests: 1000, // Very permissive default for development
-            window_duration: Duration::from_secs(60), // 1 minute window
+            requests_per_minute: 1000, // Permissive default
             enabled: true,
         }
     }
@@ -37,34 +32,17 @@ impl Default for RateLimitConfig {
 impl RateLimitConfig {
     pub fn from_env() -> Self {
         let enabled = std::env::var("RATE_LIMIT_ENABLED")
-            .unwrap_or_else(|_| "true".to_string())
-            .parse::<bool>()
+            .map(|v| v.parse().unwrap_or(true))
             .unwrap_or(true);
 
-        let max_requests = std::env::var("RATE_LIMIT_MAX_REQUESTS")
-            .unwrap_or_else(|_| "1000".to_string())
-            .parse::<u32>()
+        let requests_per_minute = std::env::var("RATE_LIMIT_PER_MINUTE")
+            .ok()
+            .and_then(|v| v.parse().ok())
             .unwrap_or(1000);
 
-        let window_seconds = std::env::var("RATE_LIMIT_WINDOW_SECONDS")
-            .unwrap_or_else(|_| "60".to_string())
-            .parse::<u64>()
-            .unwrap_or(60);
-
         Self {
-            max_requests,
-            window_duration: Duration::from_secs(window_seconds),
+            requests_per_minute,
             enabled,
-        }
-    }
-}
-
-impl From<&crate::config::RateLimitConfig> for RateLimitConfig {
-    fn from(config: &crate::config::RateLimitConfig) -> Self {
-        Self {
-            max_requests: config.max_requests as u32,
-            window_duration: Duration::from_secs(config.window_seconds),
-            enabled: config.enabled,
         }
     }
 }
@@ -72,14 +50,8 @@ impl From<&crate::config::RateLimitConfig> for RateLimitConfig {
 /// Simple in-memory rate limiter
 #[derive(Clone)]
 pub struct RateLimiter {
-    windows: Arc<Mutex<HashMap<IpAddr, Window>>>,
+    windows: Arc<Mutex<HashMap<IpAddr, (u32, Instant)>>>,
     config: RateLimitConfig,
-}
-
-#[derive(Debug)]
-struct Window {
-    count: u32,
-    reset_at: Instant,
 }
 
 impl RateLimiter {
@@ -92,31 +64,32 @@ impl RateLimiter {
 
     async fn check_rate_limit(&self, ip: IpAddr) -> Result<(u32, u32, Instant), StatusCode> {
         if !self.config.enabled {
-            return Ok((self.config.max_requests, 0, Instant::now() + self.config.window_duration));
+            return Ok((
+                self.config.requests_per_minute,
+                self.config.requests_per_minute,
+                Instant::now() + Duration::from_secs(60),
+            ));
         }
 
         let mut windows = self.windows.lock().await;
         let now = Instant::now();
+        let window_duration = Duration::from_secs(60);
 
-        let window = windows.entry(ip).or_insert(Window {
-            count: 0,
-            reset_at: now + self.config.window_duration,
-        });
+        let (count, reset_at) = windows.entry(ip).or_insert((0, now + window_duration));
 
         // Reset window if expired
-        if now >= window.reset_at {
-            window.count = 0;
-            window.reset_at = now + self.config.window_duration;
+        if now >= *reset_at {
+            *count = 0;
+            *reset_at = now + window_duration;
         }
 
-        if window.count >= self.config.max_requests {
+        if *count >= self.config.requests_per_minute {
             return Err(StatusCode::TOO_MANY_REQUESTS);
         }
 
-        window.count += 1;
-        let remaining = self.config.max_requests - window.count;
-
-        Ok((self.config.max_requests, remaining, window.reset_at))
+        *count += 1;
+        let remaining = self.config.requests_per_minute - *count;
+        Ok((self.config.requests_per_minute, remaining, *reset_at))
     }
 }
 
@@ -126,7 +99,7 @@ pub async fn rate_limit_middleware(
     next: Next,
     rate_limiter: RateLimiter,
 ) -> Response {
-    // Extract IP from X-Forwarded-For or socket address
+    // Extract IP from X-Forwarded-For or X-Real-IP headers
     let ip = extract_client_ip(&req);
 
     match rate_limiter.check_rate_limit(ip).await {
@@ -141,10 +114,10 @@ pub async fn rate_limit_middleware(
                 HeaderValue::from_str(&remaining.to_string()).unwrap(),
             );
 
-            let reset_timestamp = reset_at.duration_since(Instant::now()).as_secs();
+            let reset_seconds = reset_at.duration_since(Instant::now()).as_secs();
             headers.insert(
                 "X-RateLimit-Reset",
-                HeaderValue::from_str(&reset_timestamp.to_string()).unwrap(),
+                HeaderValue::from_str(&reset_seconds.to_string()).unwrap(),
             );
 
             response
@@ -161,25 +134,17 @@ pub async fn rate_limit_middleware(
             )
                 .into_response();
 
-            let headers = response.headers_mut();
-            headers.insert("Retry-After", HeaderValue::from_str("60").unwrap());
+            response
+                .headers_mut()
+                .insert("Retry-After", HeaderValue::from_static("60"));
 
             response
         }
-        Err(_) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(serde_json::json!({
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "An error occurred while processing your request.",
-                }
-            })),
-        )
-            .into_response(),
+        Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
 }
 
-/// Extract client IP from request
+/// Extract client IP from request headers
 fn extract_client_ip(req: &Request) -> IpAddr {
     // Try X-Forwarded-For header first
     if let Some(forwarded) = req.headers().get("x-forwarded-for") {
@@ -201,6 +166,6 @@ fn extract_client_ip(req: &Request) -> IpAddr {
         }
     }
 
-    // Default to localhost if we can't determine the IP
+    // Default to localhost
     "127.0.0.1".parse().unwrap()
 }

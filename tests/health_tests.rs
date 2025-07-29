@@ -7,10 +7,7 @@ mod common;
 async fn test_health_check() {
     let app = common::create_test_app().await;
 
-    let response = app
-        .oneshot(common::get_request("/"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/")).await.unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
 
@@ -58,26 +55,23 @@ async fn test_readiness_endpoint_when_ready() {
 async fn test_comprehensive_health_endpoint() {
     let app = common::create_test_app().await;
 
-    let response = app
-        .oneshot(common::get_request("/health"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/health")).await.unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
 
     let body = common::response_json::<serde_json::Value>(response).await;
-    
+
     // Check top-level structure
     assert_eq!(body["status"], "healthy");
     assert!(body["timestamp"].is_string());
     assert!(body["version"].is_string());
     assert!(body["uptime_seconds"].is_number());
-    
-    // Check components  
+
+    // Check components
     if body.get("components").is_some() {
         assert_eq!(body["components"]["database"]["status"], "healthy");
     }
-    
+
     // Check system info
     if body.get("system").is_some() {
         assert!(body["system"]["memory_used_mb"].is_number());

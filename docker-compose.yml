@@ -1,77 +1,24 @@
-version: '3.8'
-
 services:
   estuary:
-    build:
-      context: .
-      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - APP_PROFILE=${APP_PROFILE:-development}
       - PORT=3000
       - DATABASE_TYPE=${DATABASE_TYPE:-memory}
-      - RUST_LOG=${RUST_LOG:-estuary=debug,tower_http=debug}
+      - CONVEX_DEPLOYMENT_URL=${CONVEX_DEPLOYMENT_URL}
+      - RUST_LOG=${RUST_LOG:-estuary=info,tower_http=warn}
       - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-true}
-      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-1000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
       - RATE_LIMIT_WINDOW_SECONDS=${RATE_LIMIT_WINDOW_SECONDS:-60}
       - AUTH_ENABLED=${AUTH_ENABLED:-false}
+      - AUTH_JWKS_URLS=${AUTH_JWKS_URLS}
+      - AUTH_AUDIENCE=${AUTH_AUDIENCE}
+      - AUTH_ISSUER=${AUTH_ISSUER}
       - SECURITY_STRICT_MODE=${SECURITY_STRICT_MODE:-false}
-    env_file:
-      - .env
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health/live"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-    networks:
-      - estuary-network
-
-  # Prometheus for metrics collection
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: estuary-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    networks:
-      - estuary-network
-    depends_on:
-      - estuary
-
-  # Grafana for visualization
-  grafana:
-    image: grafana/grafana:latest
-    container_name: estuary-grafana
-    ports:
-      - "3001:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
-    networks:
-      - estuary-network
-    depends_on:
-      - prometheus
-
-networks:
-  estuary-network:
-    driver: bridge
-
-volumes:
-  prometheus_data:
-  grafana_data:
+    restart: unless-stopped

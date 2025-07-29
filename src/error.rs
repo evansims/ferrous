@@ -1,4 +1,4 @@
-use crate::database::DatabaseError;
+use crate::db::DatabaseError;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -258,14 +258,8 @@ mod tests {
     fn test_error_to_status_code_mapping() {
         let test_cases = vec![
             (AppError::NotFound("test".to_string()), StatusCode::NOT_FOUND),
-            (
-                AppError::ValidationError("test".to_string()),
-                StatusCode::UNPROCESSABLE_ENTITY,
-            ),
-            (
-                AppError::DatabaseError(DatabaseError::NotFound),
-                StatusCode::NOT_FOUND,
-            ),
+            (AppError::ValidationError("test".to_string()), StatusCode::UNPROCESSABLE_ENTITY),
+            (AppError::DatabaseError(DatabaseError::NotFound), StatusCode::NOT_FOUND),
             (
                 AppError::DatabaseError(DatabaseError::QueryError("test".to_string())),
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -286,7 +280,7 @@ mod tests {
     fn test_validation_error_string() {
         let error = AppError::ValidationError("Invalid input".to_string());
         let response = error.into_response();
-        
+
         assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
     }
 
@@ -295,7 +289,10 @@ mod tests {
         let db_errors = vec![
             (DatabaseError::NotFound, StatusCode::NOT_FOUND),
             (DatabaseError::QueryError("test".to_string()), StatusCode::INTERNAL_SERVER_ERROR),
-            (DatabaseError::ConnectionError("test".to_string()), StatusCode::SERVICE_UNAVAILABLE),
+            (
+                DatabaseError::ConnectionError("test".to_string()),
+                StatusCode::SERVICE_UNAVAILABLE,
+            ),
         ];
 
         for (db_error, expected_status) in db_errors {

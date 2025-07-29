@@ -8,18 +8,15 @@ mod common;
 async fn test_request_id_generation() {
     let app = common::create_test_app().await;
 
-    let response = app
-        .oneshot(common::get_request("/health"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/health")).await.unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    
+
     let request_id = response
         .headers()
         .get("X-Request-Id")
         .expect("X-Request-Id header missing");
-    
+
     // Verify it's a valid UUID
     let id_str = request_id.to_str().unwrap();
     Uuid::parse_str(id_str).expect("Invalid UUID format");
@@ -28,28 +25,24 @@ async fn test_request_id_generation() {
 #[tokio::test]
 async fn test_request_id_forwarding() {
     let app = common::create_test_app().await;
-    
+
     let existing_id = Uuid::new_v4().to_string();
     let mut request = common::get_request("/health");
-    request.headers_mut().insert(
-        "X-Request-Id",
-        existing_id.parse().unwrap()
-    );
+    request
+        .headers_mut()
+        .insert("X-Request-Id", existing_id.parse().unwrap());
 
-    let response = app
-        .oneshot(request)
-        .await
-        .unwrap();
+    let response = app.oneshot(request).await.unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    
+
     let request_id = response
         .headers()
         .get("X-Request-Id")
         .expect("X-Request-Id header missing")
         .to_str()
         .unwrap();
-    
+
     assert_eq!(request_id, existing_id);
 }
 
@@ -88,7 +81,7 @@ async fn test_graceful_shutdown_message() {
     // This test verifies the shutdown handler exists
     // In a real test we'd need to trigger shutdown and verify behavior
     let state = common::create_test_state();
-    
+
     // Verify the app state has necessary components for shutdown
-    assert!(state.db.health_check().await.is_ok());
+    assert!(state.repo.health_check().await.is_ok());
 }

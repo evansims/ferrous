@@ -198,56 +198,86 @@ CMD ["/app/estuary"]
 
 ### Docker Compose
 
-For development and simple deployments:
+Estuary uses a modular Docker Compose structure for flexibility:
 
+#### File Structure
+- `docker-compose.yml` - Base configuration (common settings)
+- `docker-compose.override.yml` - Development overrides (auto-loaded)
+- `docker-compose.prod.yml` - Production overrides
+- `docker-compose.monitoring.yml` - Optional monitoring stack
+
+#### Development Usage
+```bash
+# Default development setup (uses base + override automatically)
+docker-compose up
+
+# Development with monitoring
+docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up
+```
+
+#### Production Usage
+```bash
+# Production deployment
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Production with monitoring
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.monitoring.yml up -d
+
+# Scale the service
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --scale estuary=3
+```
+
+#### Configuration Examples
+
+**Base configuration** (`docker-compose.yml`):
 ```yaml
 version: '3.8'
-
 services:
   estuary:
-    build: .
     ports:
       - "3000:3000"
     environment:
-      - APP_PROFILE=production
-      - DATABASE_TYPE=memory  # Change for production
-      - RUST_LOG=estuary=info
-    env_file:
-      - .env.production
-    restart: unless-stopped
+      - PORT=3000
+      - DATABASE_TYPE=${DATABASE_TYPE:-memory}
+      # Common settings...
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health/live"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+    restart: unless-stopped
+```
 
-  # Add monitoring stack
+**Production overrides** (`docker-compose.prod.yml`):
+```yaml
+version: '3.8'
+services:
+  estuary:
+    image: ${DOCKER_REGISTRY:-docker.io}/estuary:${VERSION:-latest}
+    environment:
+      - APP_PROFILE=production
+      - RUST_LOG=estuary=info,tower_http=warn
+      - AUTH_ENABLED=true
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+```
+
+**Monitoring stack** (`docker-compose.monitoring.yml`):
+```yaml
+version: '3.8'
+services:
   prometheus:
     image: prom/prometheus:latest
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
 
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3001:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-
-volumes:
-  prometheus_data:
-  grafana_data:
 ```
 
 ### Kubernetes Deployment

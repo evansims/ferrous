@@ -1,0 +1,18 @@
+# Development overrides - automatically loaded by docker-compose
+services:
+  estuary:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - APP_PROFILE=development
+      - RUST_LOG=estuary=debug,tower_http=debug
+      - RATE_LIMIT_MAX_REQUESTS=1000
+      - AUTH_ENABLED=false
+      - SECURITY_STRICT_MODE=false
+    env_file:
+      - .env
+    # volumes:
+    #   # Mount source for development (optional - uncomment if needed)
+    #   - ./src:/app/src:ro
+    #   - ./Cargo.toml:/app/Cargo.toml:ro

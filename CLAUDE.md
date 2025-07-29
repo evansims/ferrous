@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Estuary is a minimal REST API service built with Rust and Axum, designed for reliability and clean architecture. The entire application is contained in a single `src/main.rs` file with in-memory storage.
+Estuary is a minimal REST API service built with Rust and Axum, designed for reliability and clean architecture.
 
 ## Development Commands
 
@@ -63,24 +63,33 @@ The service follows a modular architecture with clear separation of concerns:
 ### Module Structure
 - `src/main.rs` - Application entry point, server initialization
 - `src/lib.rs` - Library root exposing public modules
-- `src/models/` - Domain models and DTOs
-  - `item.rs` - Item entity and request/response types
-- `src/handlers/` - HTTP request handlers
-  - `health.rs` - Health check endpoint
-  - `items.rs` - CRUD operations for items
+- `src/config.rs` - Simplified configuration using environment variables
+- `src/db.rs` - Database abstraction with repository pattern and metrics
 - `src/error.rs` - Centralized error handling with `AppError` enum
-- `src/state.rs` - Application state management
+- `src/handlers.rs` - All HTTP handlers consolidated in one file
+- `src/metrics.rs` - Prometheus metrics collection
+- `src/middleware/` - Middleware implementations
+  - `mod.rs` - Middleware composition
+  - `security.rs` - CORS and security headers
+  - `observability.rs` - Request tracing and metrics
+  - `auth.rs` - JWT authentication
+  - `rate_limit.rs` - Rate limiting
+  - `version.rs` - API versioning
+- `src/models.rs` - Domain models (Item, CreateItemRequest, UpdateItemRequest)
+- `src/openapi.rs` - OpenAPI documentation
 - `src/routes.rs` - Route configuration
-- `src/middleware.rs` - HTTP middleware setup
+- `src/state.rs` - Application state management
+- `src/validation.rs` - Request validation
 
 ### Key Design Patterns
 
 1. **Database Abstraction**:
-   - Repository pattern with `Database` trait and `ItemRepository`
-   - Swappable implementations via `DatabaseFactory`
+   - Repository pattern with `ItemRepository` trait
+   - Swappable implementations via `create_repository()` factory
    - Currently supports in-memory storage, easily extensible
+   - Metrics tracking built into repository wrapper
 
-2. **State Management**: `SharedState` holds `Arc<dyn Database>` for database access
+2. **State Management**: `SharedState` holds `Arc<dyn ItemRepository>` for database access
 
 3. **Error Handling**:
    - Centralized through `AppError` enum that implements `IntoResponse`
@@ -92,10 +101,9 @@ The service follows a modular architecture with clear separation of concerns:
    - CorsLayer - Enables cross-origin requests
 
 5. **Type Organization**:
-   - Models: `Item`, `CreateItemRequest`, `UpdateItemRequest` in `models/`
-   - Repositories: `ItemRepository` trait in `database/repositories/`
-   - Database implementations: `InMemoryDatabase` in `database/implementations/`
-   - Handler types: `ListQuery`, `ListResponse` in `handlers/items.rs`
+   - Models: `Item`, `CreateItemRequest`, `UpdateItemRequest` in `models.rs`
+   - Repository: `ItemRepository` trait and implementations in `db.rs`
+   - Handler types: `ListQuery`, `ListResponse` in `handlers.rs`
 
 ## Important Implementation Details
 

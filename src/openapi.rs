@@ -1,9 +1,6 @@
 use crate::{
     error::{ErrorCode, ErrorDetails, ErrorResponse, ValidationError},
-    handlers::{
-        health::{DatabaseHealth, HealthResponse, HealthStatus, SystemHealth},
-        items::ListResponse,
-    },
+    handlers::{DatabaseHealth, HealthResponse, HealthStatus, ListResponse, SystemHealth},
     models::{CreateItemRequest, Item, UpdateItemRequest},
 };
 use axum::{response::IntoResponse, routing::get, Json, Router};
@@ -32,14 +29,14 @@ use utoipa::{
         (url = "https://api.example.com", description = "Production server"),
     ),
     paths(
-        crate::handlers::health::health_check,
-        crate::handlers::health::liveness,
-        crate::handlers::health::readiness,
-        crate::handlers::items::list_items,
-        crate::handlers::items::get_item,
-        crate::handlers::items::create_item,
-        crate::handlers::items::update_item,
-        crate::handlers::items::delete_item,
+        crate::handlers::health_check,
+        crate::handlers::liveness,
+        crate::handlers::readiness,
+        crate::handlers::list_items,
+        crate::handlers::get_item,
+        crate::handlers::create_item,
+        crate::handlers::update_item,
+        crate::handlers::delete_item,
     ),
     components(
         schemas(
@@ -47,7 +44,7 @@ use utoipa::{
             Item,
             CreateItemRequest,
             UpdateItemRequest,
-            ListResponse<Item>,
+            ListResponse,
 
             // Health
             HealthResponse,

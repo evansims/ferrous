@@ -1,16 +1,11 @@
-pub mod auth;
 pub mod config;
-pub mod database;
+pub mod db;
 pub mod error;
 pub mod handlers;
 pub mod metrics;
 pub mod middleware;
 pub mod models;
 pub mod openapi;
-pub mod rate_limit;
-pub mod request_id;
 pub mod routes;
-pub mod security;
 pub mod state;
 pub mod validation;
-pub mod version;

@@ -33,10 +33,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::OK);
-        assert_eq!(
-            response.headers().get("X-Test-Header").unwrap(),
-            "test-value"
-        );
+        assert_eq!(response.headers().get("X-Test-Header").unwrap(), "test-value");
     }
 
     #[tokio::test]
@@ -49,7 +46,11 @@ mod tests {
         let order2 = call_order.clone();
 
         async fn middleware1(req: Request<Body>, next: Next) -> Response {
-            let order = req.extensions().get::<Arc<Mutex<Vec<String>>>>().unwrap().clone();
+            let order = req
+                .extensions()
+                .get::<Arc<Mutex<Vec<String>>>>()
+                .unwrap()
+                .clone();
             order.lock().await.push("middleware1_before".to_string());
             let response = next.run(req).await;
             order.lock().await.push("middleware1_after".to_string());
@@ -57,7 +58,11 @@ mod tests {
         }
 
         async fn middleware2(req: Request<Body>, next: Next) -> Response {
-            let order = req.extensions().get::<Arc<Mutex<Vec<String>>>>().unwrap().clone();
+            let order = req
+                .extensions()
+                .get::<Arc<Mutex<Vec<String>>>>()
+                .unwrap()
+                .clone();
             order.lock().await.push("middleware2_before".to_string());
             let response = next.run(req).await;
             order.lock().await.push("middleware2_after".to_string());
@@ -65,7 +70,11 @@ mod tests {
         }
 
         async fn handler(req: Request<Body>) -> &'static str {
-            let order = req.extensions().get::<Arc<Mutex<Vec<String>>>>().unwrap().clone();
+            let order = req
+                .extensions()
+                .get::<Arc<Mutex<Vec<String>>>>()
+                .unwrap()
+                .clone();
             order.lock().await.push("handler".to_string());
             "OK"
         }
@@ -105,13 +114,12 @@ mod tests {
     async fn test_response_modification_in_middleware() {
         async fn add_header_middleware(req: Request<Body>, next: Next) -> Response {
             let mut response = next.run(req).await;
-            response.headers_mut().insert(
-                "X-Custom-Header",
-                "custom-value".parse().unwrap(),
-            );
+            response
+                .headers_mut()
+                .insert("X-Custom-Header", "custom-value".parse().unwrap());
             response
         }
-        
+
         let app = Router::new()
             .route("/", axum::routing::get(dummy_handler))
             .layer(middleware::from_fn(add_header_middleware));
@@ -122,9 +130,6 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::OK);
-        assert_eq!(
-            response.headers().get("X-Custom-Header").unwrap(),
-            "custom-value"
-        );
+        assert_eq!(response.headers().get("X-Custom-Header").unwrap(), "custom-value");
     }
 }

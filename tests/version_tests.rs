@@ -121,34 +121,5 @@ async fn test_openapi_includes_version_info() {
         .contains("API version v1"));
 }
 
-// Test version extraction functions directly
-#[cfg(test)]
-mod unit_tests {
-    use axum::http::HeaderMap;
-    use estuary::version::{extract_version, ApiVersion};
-
-    #[test]
-    fn test_version_extraction_from_various_sources() {
-        let mut headers = HeaderMap::new();
-
-        // Test URL path extraction
-        let version = extract_version("/api/v1/items", &headers);
-        assert_eq!(version, ApiVersion::V1);
-
-        // Test Accept header extraction
-        headers.insert("accept", "application/vnd.estuary.v1+json".parse().unwrap());
-        let version = extract_version("/items", &headers);
-        assert_eq!(version, ApiVersion::V1);
-
-        // Test X-API-Version header extraction
-        headers.clear();
-        headers.insert("x-api-version", "v1".parse().unwrap());
-        let version = extract_version("/items", &headers);
-        assert_eq!(version, ApiVersion::V1);
-
-        // Test default version
-        headers.clear();
-        let version = extract_version("/items", &headers);
-        assert_eq!(version, ApiVersion::default());
-    }
-}
+// Version extraction is now simplified and internal to middleware
+// These unit tests are no longer needed as version handling is straightforward

@@ -83,7 +83,7 @@ async fn test_create_item_invalid_json() {
                 .uri("/api/v1/items")
                 .header("content-type", "application/json")
                 .body(Body::from("invalid json"))
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();
@@ -98,7 +98,8 @@ async fn test_get_item() {
     let app = estuary::routes::create_routes(state.clone());
 
     // Create an item first
-    let created = common::create_test_item(&state.db, "Test Item", Some("Test Description")).await;
+    let created =
+        common::create_test_item(&state.repo, "Test Item", Some("Test Description")).await;
 
     let response = app
         .oneshot(common::get_request(&format!("/api/v1/items/{}", created.id)))
@@ -132,7 +133,8 @@ async fn test_update_item() {
     let app = estuary::routes::create_routes(state.clone());
 
     // Create an item first
-    let created = common::create_test_item(&state.db, "Original Name", Some("Original Description")).await;
+    let created =
+        common::create_test_item(&state.repo, "Original Name", Some("Original Description")).await;
 
     let update_body = json!({
         "name": "Updated Name"
@@ -173,7 +175,7 @@ async fn test_delete_item() {
     let app = estuary::routes::create_routes(state.clone());
 
     // Create an item first
-    let created = common::create_test_item(&state.db, "To Delete", None).await;
+    let created = common::create_test_item(&state.repo, "To Delete", None).await;
 
     let response = app
         .clone()
@@ -211,7 +213,7 @@ async fn test_list_items() {
     let app = estuary::routes::create_routes(state.clone());
 
     // Create multiple items
-    common::create_test_items(&state.db, 5).await;
+    common::create_test_items(&state.repo, 5).await;
 
     let response = app
         .oneshot(common::get_request("/api/v1/items"))
@@ -233,7 +235,7 @@ async fn test_list_items_with_pagination() {
     let app = estuary::routes::create_routes(state.clone());
 
     // Create multiple items
-    common::create_test_items(&state.db, 5).await;
+    common::create_test_items(&state.repo, 5).await;
 
     let response = app
         .oneshot(common::get_request("/api/v1/items?limit=2&offset=2"))
@@ -300,7 +302,7 @@ async fn test_rate_limit_multiple_requests() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    
+
     let initial_remaining = response
         .headers()
         .get("X-RateLimit-Remaining")
@@ -317,7 +319,7 @@ async fn test_rate_limit_multiple_requests() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    
+
     let new_remaining = response
         .headers()
         .get("X-RateLimit-Remaining")
@@ -335,22 +337,13 @@ async fn test_rate_limit_multiple_requests() {
 async fn test_security_headers() {
     let app = common::create_test_app().await;
 
-    let response = app
-        .oneshot(common::get_request("/health"))
-        .await
-        .unwrap();
+    let response = app.oneshot(common::get_request("/health")).await.unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
 
     // Check security headers
-    assert_eq!(
-        response.headers().get("X-Content-Type-Options").unwrap(),
-        "nosniff"
-    );
-    assert_eq!(
-        response.headers().get("X-Frame-Options").unwrap(),
-        "DENY"
-    );
+    assert_eq!(response.headers().get("X-Content-Type-Options").unwrap(), "nosniff");
+    assert_eq!(response.headers().get("X-Frame-Options").unwrap(), "DENY");
     assert!(response.headers().contains_key("X-Request-Id"));
 }
 
@@ -367,7 +360,7 @@ async fn test_structured_error_response_format() {
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 
     let error: serde_json::Value = common::response_json(response).await;
-    
+
     // Check error response structure
     assert!(error["error"].is_string());
     assert!(error["message"].is_string());
@@ -389,7 +382,7 @@ async fn test_validation_error_structure() {
                 .uri("/api/v1/items")
                 .header("content-type", "application/json")
                 .body(Body::from("{invalid json"))
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();
@@ -411,7 +404,7 @@ async fn test_error_codes_match_status_codes() {
         .oneshot(common::get_request("/api/v1/items/nonexistent"))
         .await
         .unwrap();
-    
+
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
     let error: serde_json::Value = common::response_json(response).await;
     assert_eq!(error["error"], "NOT_FOUND");
@@ -424,11 +417,11 @@ async fn test_error_codes_match_status_codes() {
                 .uri("/api/v1/items")
                 .header("content-type", "application/json")
                 .body(Body::from("not json"))
-                .unwrap()
+                .unwrap(),
         )
         .await
         .unwrap();
-    
+
     assert_eq!(response.status(), StatusCode::BAD_REQUEST);
     let error: serde_json::Value = common::response_json(response).await;
     assert_eq!(error["error"], "BAD_REQUEST");
