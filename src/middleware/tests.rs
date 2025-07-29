@@ -31,10 +31,7 @@ async fn test_middleware_chain_execution() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    assert_eq!(
-        response.headers().get("x-test").unwrap(),
-        "middleware-applied"
-    );
+    assert_eq!(response.headers().get("x-test").unwrap(), "middleware-applied");
 }
 
 #[tokio::test]
@@ -44,14 +41,12 @@ async fn test_middleware_ordering() {
         .route("/", axum::routing::get(|| async { "Hello" }))
         .layer(middleware::from_fn(|req: Request<Body>, next: Next| async move {
             let mut res = next.run(req).await;
-            res.headers_mut()
-                .insert("x-second", "2".parse().unwrap());
+            res.headers_mut().insert("x-second", "2".parse().unwrap());
             res
         }))
         .layer(middleware::from_fn(|req: Request<Body>, next: Next| async move {
             let mut res = next.run(req).await;
-            res.headers_mut()
-                .insert("x-first", "1".parse().unwrap());
+            res.headers_mut().insert("x-first", "1".parse().unwrap());
             res
         }));
 
@@ -82,10 +77,7 @@ async fn test_blocking_middleware() {
 #[tokio::test]
 async fn test_response_modification_in_middleware() {
     let app = Router::new()
-        .route(
-            "/",
-            axum::routing::get(|| async { (StatusCode::OK, "Original") }),
-        )
+        .route("/", axum::routing::get(|| async { (StatusCode::OK, "Original") }))
         .layer(middleware::from_fn(|req: Request<Body>, next: Next| async move {
             let mut res = next.run(req).await;
             // Modify response body
@@ -100,4 +92,3 @@ async fn test_response_modification_in_middleware() {
 
     assert_eq!(response.status(), StatusCode::ACCEPTED);
 }
-
