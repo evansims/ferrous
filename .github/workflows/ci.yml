@@ -55,17 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Full history for better secret detection
 
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      # Scan for secrets with gitleaks
-      - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Install cargo-audit if not cached
       - uses: taiki-e/install-action@v2
@@ -78,16 +70,64 @@ jobs:
       # Check for common security issues
       - name: Security lints
         run: |
-          # Check for hardcoded credentials patterns
-          ! grep -r -E "(password|secret|token|key)\s*=\s*[\"'][^\"']+[\"']" src/ --include="*.rs" || {
-            echo "Found potential hardcoded credentials"
+          echo "::group::Checking for hardcoded secrets"
+          # Check for potential secrets in code
+          # More comprehensive patterns for detecting secrets
+          PATTERNS=(
+            # API keys and tokens
+            "(api[_-]?key|apikey|access[_-]?token|auth[_-]?token)\s*[:=]\s*[\"'][0-9a-zA-Z]{16,}[\"']"
+            # Passwords
+            "(password|passwd|pwd)\s*[:=]\s*[\"'][^\"']{8,}[\"']"
+            # Private keys
+            "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
+            # AWS keys
+            "AKIA[0-9A-Z]{16}"
+            # Generic secrets
+            "(secret|private[_-]?key)\s*[:=]\s*[\"'][^\"']{8,}[\"']"
+          )
+          
+          FOUND=0
+          for pattern in "${PATTERNS[@]}"; do
+            if grep -r -i -E "$pattern" src/ --include="*.rs" 2>/dev/null; then
+              echo "❌ Found potential hardcoded secrets matching pattern: $pattern"
+              FOUND=1
+            fi
+          done
+          
+          if [ $FOUND -eq 1 ]; then
+            echo "Please use environment variables for sensitive data"
             exit 1
-          }
+          else
+            echo "✅ No hardcoded secrets found"
+          fi
+          echo "::endgroup::"
 
-          # Check for unsafe code
-          ! grep -r "unsafe" src/ --include="*.rs" || {
-            echo "Found unsafe code - please ensure it's necessary and properly documented"
-          }
+          echo "::group::Checking for unsafe code"
+          # Check for unsafe code blocks
+          UNSAFE_COUNT=$(grep -r "unsafe" src/ --include="*.rs" | grep -v "// SAFETY:" | wc -l | tr -d ' ')
+          if [ "$UNSAFE_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $UNSAFE_COUNT unsafe code blocks without SAFETY comments"
+            echo "All unsafe blocks should have a // SAFETY: comment explaining why they're necessary"
+            grep -r -n "unsafe" src/ --include="*.rs" | grep -v "// SAFETY:"
+          else
+            echo "✅ No undocumented unsafe code found"
+          fi
+          echo "::endgroup::"
+
+      # Additional security checks with cargo
+      - name: Check dependencies for known vulnerabilities
+        run: |
+          echo "::group::Running cargo audit"
+          cargo audit
+          echo "::endgroup::"
+
+      # Check for outdated dependencies that might have security fixes
+      - name: Check for outdated dependencies
+        run: |
+          echo "::group::Checking for outdated dependencies"
+          cargo install cargo-outdated || true
+          cargo outdated --exit-code 1 || echo "⚠️  Some dependencies are outdated - consider updating"
+          echo "::endgroup::"
 
   # Cross-platform tests
   cross-platform:

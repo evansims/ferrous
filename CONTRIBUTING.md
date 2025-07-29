@@ -102,7 +102,8 @@ To ensure your local environment matches CI exactly:
 2. **Linting Rules**: `.cargo/config.toml` and `.clippy.toml` ensure consistent linting
 3. **Formatting**: `rustfmt.toml` defines formatting rules
 4. **Pre-commit Hooks**: Automatically run checks before commits
-5. **CI Simulation**: Run `make ci-local` to run exactly what CI runs
+5. **Pre-push Hooks**: Basic secret detection before pushing
+6. **CI Simulation**: Run `make ci-local` to run exactly what CI runs
 
 If you encounter differences between local and CI:
 - Ensure you're using the project's rust-toolchain: `rustup show`
@@ -467,6 +468,31 @@ cargo doc --open
 # Generate documentation with private items
 cargo doc --document-private-items
 ```
+
+## Security
+
+### Security Scanning
+
+We use open-source tools for security scanning:
+
+- **cargo audit**: Checks dependencies for known vulnerabilities
+- **Pattern matching**: Basic secret detection in CI
+- **Git hooks**: Pre-push hooks check for common secret patterns
+
+To run security checks locally:
+```bash
+cargo audit  # Check for vulnerable dependencies
+make ci-local  # Run all CI checks including security
+```
+
+**Note**: We do not use gitleaks as it requires a commercial license for organizational use.
+
+### Reporting Security Issues
+
+If you discover a security vulnerability, please:
+1. **DO NOT** open a public issue
+2. Email security@example.com with details
+3. Include steps to reproduce if possible
 
 ## Community
 
