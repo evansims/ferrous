@@ -109,7 +109,7 @@ cargo test               # Run tests
 
 ```
 estuary/
-├── src/                     # Source code
+├── src/                    # Source code
 │   ├── db.rs               # Database abstraction and implementations
 │   ├── handlers.rs         # HTTP request handlers
 │   ├── middleware/         # HTTP middleware (auth, rate limit, etc.)
@@ -118,10 +118,10 @@ estuary/
 │   ├── error.rs            # Error types and handling
 │   ├── routes.rs           # API route definitions
 │   └── main.rs             # Application entry point
-├── docs/                    # Documentation
-├── convex/                  # Convex database functions
-├── monitoring/              # Prometheus and Grafana configs
-└── .github/                 # CI/CD workflows
+├── docs/                   # Documentation
+├── convex/                 # Convex database functions
+├── monitoring/             # Prometheus and Grafana configs
+└── .github/                # CI/CD workflows
 ```
 
 ## Maintenance
