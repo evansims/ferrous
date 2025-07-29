@@ -7,6 +7,7 @@ Welcome to the Estuary project documentation. Estuary is a Rust-based web servic
 - [Getting Started](./getting-started.md)
 - [Architecture](./architecture.md)
 - [API Reference](./api-reference.md)
+- [Authentication](./authentication.md)
 - [Database](./database/)
   - [Overview](./database/README.md)
   - [Convex Implementation](./database/convex.md)
@@ -60,10 +61,28 @@ estuary/
 
 ## Key Features
 
+### Core Architecture
 - **Modular Architecture**: Clean separation of concerns with a modular codebase structure
 - **Database Abstraction**: Pluggable database layer supporting multiple implementations
 - **Environment-based Configuration**: Easy configuration through environment variables
 - **Hot Reload**: Development server with automatic recompilation on changes
+
+### API Features
+- **OpenAPI/Swagger Documentation**: Interactive API documentation at `/docs`
+- **Structured Error Responses**: Consistent error format with request correlation
+- **Input Validation**: Comprehensive validation with field length limits and sanitization
+- **Request ID Tracking**: Unique request IDs for debugging and log correlation
+
+### Security & Reliability
+- **JWKS Authentication**: JWT validation with support for multiple identity providers
+- **Rate Limiting**: Configurable per-IP rate limits with informative headers
+- **Security Headers**: Comprehensive security headers (CSP, HSTS, etc.)
+- **Graceful Shutdown**: Proper connection draining and shutdown handling
+
+### Observability
+- **Health Endpoints**: Multiple health check endpoints for different purposes
+- **System Metrics**: Memory usage, uptime, and database health monitoring
+- **Structured Logging**: Correlation IDs and detailed request/response logging
 - **Production Ready**: Built with reliability and fault-tolerance in mind
 
 ## Technology Stack
