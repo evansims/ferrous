@@ -1,0 +1,35 @@
+#!/bin/bash
+# Pre-commit hook to run checks before committing
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Check if we're in the right directory
+if [ ! -f "Cargo.toml" ]; then
+    echo "Error: Not in a Rust project directory"
+    exit 1
+fi
+
+# Run formatting check
+echo "Checking formatting..."
+if ! cargo fmt -- --check; then
+    echo "❌ Formatting issues found. Run 'cargo fmt' to fix."
+    exit 1
+fi
+
+# Run clippy
+echo "Running clippy..."
+if ! cargo clippy -- -D warnings; then
+    echo "❌ Clippy warnings found. Please fix them before committing."
+    exit 1
+fi
+
+# Run tests
+echo "Running tests..."
+if ! cargo test --quiet; then
+    echo "❌ Tests failed. Please fix them before committing."
+    exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"

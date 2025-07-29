@@ -41,30 +41,38 @@ By participating in this project, you agree to abide by our Code of Conduct:
 
 ### Prerequisites
 
-- Rust 1.70 or later (install via [rustup](https://rustup.rs/))
+- Rust (managed by rust-toolchain.toml - will auto-install correct version)
 - Git
 - Make (optional but recommended)
 
 ### Initial Setup
 
-1. **Install Rust**:
+1. **Clone and setup**:
    ```bash
+   git clone https://github.com/evansims/ferrous.git
+   cd ferrous
+   ./scripts/setup-dev.sh  # Sets up git hooks and installs tools
+   ```
+
+   This script will:
+   - Configure git hooks for pre-commit checks
+   - Install cargo-watch and cargo-audit
+   - Verify the correct Rust toolchain is installed
+
+2. **Manual setup** (if you prefer):
+   ```bash
+   # Install Rust (if not already installed)
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   
+   # The rust-toolchain.toml file will ensure the correct version is used
+   # Install development tools
+   cargo install cargo-watch cargo-audit
+   
+   # Configure git hooks
+   git config core.hooksPath .githooks
    ```
 
-2. **Install development tools**:
-   ```bash
-   rustup component add clippy rustfmt
-   cargo install cargo-watch  # For hot-reloading during development
-   ```
-
-3. **Set up pre-commit hooks** (optional but recommended):
-   ```bash
-   pip install pre-commit
-   pre-commit install
-   ```
-
-4. **Create environment file**:
+3. **Create environment file**:
    ```bash
    cp .env.example .env
    ```
@@ -85,6 +93,21 @@ cargo test                # Run tests
 cargo clippy              # Run linter
 cargo fmt                 # Format code
 ```
+
+### CI/Local Development Parity
+
+To ensure your local environment matches CI exactly:
+
+1. **Toolchain Version**: The `rust-toolchain.toml` file pins the exact Rust version
+2. **Linting Rules**: `.cargo/config.toml` and `.clippy.toml` ensure consistent linting
+3. **Formatting**: `rustfmt.toml` defines formatting rules
+4. **Pre-commit Hooks**: Automatically run checks before commits
+5. **CI Simulation**: Run `make ci-local` to run exactly what CI runs
+
+If you encounter differences between local and CI:
+- Ensure you're using the project's rust-toolchain: `rustup show`
+- Run `cargo clean` and rebuild
+- Check that you have the latest version of the config files
 
 ## Code Style Guidelines
 
@@ -269,12 +292,17 @@ test: add integration tests for auth
    git rebase main
    ```
 
-3. **Run all checks**:
+3. **Run all checks** (IMPORTANT - matches CI exactly):
    ```bash
+   make ci-local  # Run ALL CI checks locally
+   # Or run individually:
+   make fmt       # Format code
    make test      # Run all tests
    make lint      # Run linter
-   make fmt       # Format code
+   make audit     # Security audit
    ```
+   
+   **Note**: Always run `make ci-local` before pushing to ensure your code will pass CI!
 
 4. **Push to your fork**:
    ```bash

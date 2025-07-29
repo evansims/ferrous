@@ -1,0 +1,80 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # Quick checks that should pass before review
+  quick-checks:
+    name: Quick Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          rustflags: "-D warnings"
+
+      - name: Validate rust-toolchain.toml
+        run: |
+          if [ ! -f "rust-toolchain.toml" ]; then
+            echo "❌ rust-toolchain.toml not found!"
+            exit 1
+          fi
+          echo "✅ rust-toolchain.toml exists"
+
+      - name: Check formatting
+        run: |
+          echo "::group::Checking code formatting"
+          cargo fmt -- --check
+          echo "::endgroup::"
+
+      - name: Run clippy
+        run: |
+          echo "::group::Running clippy lints"
+          cargo clippy -- -D warnings
+          echo "::endgroup::"
+
+      - name: Check compilation
+        run: |
+          echo "::group::Checking compilation"
+          cargo check --all-targets
+          echo "::endgroup::"
+
+  # Run tests only if quick checks pass
+  tests:
+    name: Tests
+    needs: quick-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Run tests
+        run: cargo test --verbose
+
+  # Security audit
+  audit:
+    name: Security Audit
+    needs: quick-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+
+      - name: Run cargo audit
+        run: cargo audit

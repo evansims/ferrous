@@ -1,4 +1,4 @@
-.PHONY: build run watch clean check test
+.PHONY: build run watch clean check test fmt lint ci audit ci-local help
 
 # Build the project in release mode
 build:
@@ -32,10 +32,24 @@ fmt:
 lint:
 	cargo clippy
 
+# Run security audit
+audit:
+	cargo audit
+
 # Run format check and linter (useful for CI)
 ci: check
 	cargo fmt -- --check
 	cargo clippy -- -D warnings
+
+# Run all CI checks locally (exactly as CI does)
+ci-local: 
+	@echo "Running CI checks with pinned toolchain..."
+	@echo "Toolchain: $$(rustc --version)"
+	cargo fmt -- --check
+	cargo clippy -- -D warnings
+	cargo test --verbose
+	cargo audit
+	@echo "All CI checks passed!"
 
 # Help command
 help:
@@ -49,6 +63,8 @@ help:
 	@echo "  make fmt    - Format code"
 	@echo "  make lint   - Run clippy linter"
 	@echo "  make ci     - Run CI checks (format & lint)"
+	@echo "  make audit  - Run security audit"
+	@echo "  make ci-local - Run all CI checks locally"
 	@echo "  make help   - Show this help message"
 
 # Default target

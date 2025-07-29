@@ -11,74 +11,43 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  # Main test job - respects rust-toolchain.toml
   test:
     name: Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust:
-          - stable
-          - beta
-          - nightly
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
+      # This action properly respects rust-toolchain.toml
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy
+          # Explicitly use minimal profile to match rust-toolchain.toml
+          rustflags: "-D warnings"
 
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+      - name: Show Rust version
+        run: |
+          echo "Rust toolchain:"
+          rustc --version
+          cargo --version
+          cargo fmt --version
+          cargo clippy --version
 
-      - name: Cache cargo build
-        uses: actions/cache@v4
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-${{ matrix.rust }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-build-${{ matrix.rust }}-
-
+      # Run exactly the same checks as make ci-local
       - name: Check formatting
         run: cargo fmt -- --check
-        if: matrix.rust == 'stable'
 
       - name: Run clippy
         run: cargo clippy -- -D warnings
-        if: matrix.rust == 'stable'
-
-      - name: Build
-        run: cargo build --verbose
 
       - name: Run tests
         run: cargo test --verbose
 
+      - name: Build
+        run: cargo build --verbose
+
       - name: Build release
         run: cargo build --release --verbose
-        if: matrix.rust == 'stable'
-
-  # Minimum supported Rust version check
-  msrv:
-    name: MSRV Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust 1.86
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: "1.86"
-
-      - name: Check MSRV
-        run: cargo check --verbose
 
   # Security scanning
   security:
@@ -89,15 +58,19 @@ jobs:
         with:
           fetch-depth: 0 # Full history for better secret detection
 
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
       # Scan for secrets with gitleaks
       - name: Run gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Cargo audit for vulnerable dependencies
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
+      # Install cargo-audit if not cached
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
 
       - name: Run cargo audit
         run: cargo audit
@@ -115,3 +88,70 @@ jobs:
           ! grep -r "unsafe" src/ --include="*.rs" || {
             echo "Found unsafe code - please ensure it's necessary and properly documented"
           }
+
+  # Cross-platform tests
+  cross-platform:
+    name: Cross-platform Tests
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          rustflags: "-D warnings"
+
+      - name: Run tests
+        run: cargo test --verbose
+
+  # Verify MSRV matches rust-toolchain.toml
+  msrv-check:
+    name: Verify MSRV
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract MSRV from rust-toolchain.toml
+        id: msrv
+        run: |
+          MSRV=$(grep 'channel' rust-toolchain.toml | cut -d'"' -f2)
+          echo "msrv=$MSRV" >> $GITHUB_OUTPUT
+          echo "MSRV is: $MSRV"
+
+      - name: Install MSRV toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ steps.msrv.outputs.msrv }}
+
+      - name: Check with MSRV
+        run: cargo check --verbose
+
+  # Documentation build check
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Check documentation
+        run: cargo doc --no-deps --document-private-items
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+
+  # All checks must pass
+  ci-success:
+    name: CI Success
+    if: always()
+    needs: [test, security, cross-platform, msrv-check, docs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decide whether all jobs succeeded
+        uses: re-actors/alls-green@v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}
