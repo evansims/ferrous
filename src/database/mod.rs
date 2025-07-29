@@ -12,7 +12,7 @@ pub use repositories::*;
 pub trait Database: Send + Sync {
     /// Get the items repository
     fn items(&self) -> Arc<dyn ItemRepository>;
-    
+
     /// Health check for the database connection
     async fn health_check(&self) -> Result<(), DatabaseError>;
 }
@@ -22,16 +22,16 @@ pub trait Database: Send + Sync {
 pub enum DatabaseError {
     #[error("Item not found")]
     NotFound,
-    
+
     #[error("Database connection error: {0}")]
     ConnectionError(String),
-    
+
     #[error("Database query error: {0}")]
     QueryError(String),
-    
+
     #[error("Serialization error: {0}")]
     SerializationError(String),
-    
+
     #[error("Lock error")]
     LockError,
 }

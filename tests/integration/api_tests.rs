@@ -17,7 +17,7 @@ async fn test_health_check() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    
+
     let body = axum::body::to_bytes(response.into_body(), usize::MAX)
         .await
         .unwrap();
@@ -52,7 +52,7 @@ async fn test_create_item() {
         .await
         .unwrap();
     let item: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    
+
     assert_eq!(item["name"], "Test Item");
     assert_eq!(item["description"], "Test Description");
     assert!(item["id"].is_string());
@@ -86,7 +86,7 @@ async fn test_create_item_without_description() {
         .await
         .unwrap();
     let item: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    
+
     assert_eq!(item["name"], "Test Item");
     assert!(item["description"].is_null());
 }
@@ -115,7 +115,7 @@ async fn test_get_item() {
         .await
         .unwrap();
     let item: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    
+
     assert_eq!(item["id"], created.id);
     assert_eq!(item["name"], "Test Item");
     assert_eq!(item["description"], "Test Description");
@@ -144,7 +144,8 @@ async fn test_update_item() {
     let app = estuary::routes::create_routes(state.clone());
 
     // Create an item first
-    let created = common::create_test_item(&state.db, "Original Name", Some("Original Description")).await;
+    let created =
+        common::create_test_item(&state.db, "Original Name", Some("Original Description")).await;
 
     let update_body = json!({
         "name": "Updated Name"
@@ -168,7 +169,7 @@ async fn test_update_item() {
         .await
         .unwrap();
     let item: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    
+
     assert_eq!(item["name"], "Updated Name");
     assert_eq!(item["description"], "Original Description");
 }
@@ -233,7 +234,7 @@ async fn test_list_items() {
         .await
         .unwrap();
     let list_response: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    
+
     assert_eq!(list_response["items"].as_array().unwrap().len(), 5);
     assert_eq!(list_response["total"], 5);
     assert_eq!(list_response["limit"], 20);
@@ -264,7 +265,7 @@ async fn test_list_items_with_pagination() {
         .await
         .unwrap();
     let list_response: serde_json::Value = serde_json::from_slice(&body).unwrap();
-    
+
     assert_eq!(list_response["items"].as_array().unwrap().len(), 2);
     assert_eq!(list_response["total"], 5);
     assert_eq!(list_response["limit"], 2);
