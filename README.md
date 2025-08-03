@@ -1,6 +1,6 @@
-# Ferrous
+# Rust API
 
-Skip the boilerplate. This Rust + Axum template gets you straight to building production-ready REST APIs with clean architecture and zero cruft. Clone, code, ship.
+A Rust template for building production-ready REST APIs with clean architecture and best practices.
 
 ## Documentation
 
