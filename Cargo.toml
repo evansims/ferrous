@@ -16,7 +16,7 @@ chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.17", features = ["v4", "serde"] }
 dotenvy = "0.15"
 async-trait = "0.1"
-thiserror = "^1"
+thiserror = "^2.0.0"
 convex = "0.9"
 validator = { version = "0.20", features = ["derive"] }
 jsonwebtoken = "9.3"
